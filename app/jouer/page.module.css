@@ -1,0 +1,66 @@
+.container {
+    width: 50vw;
+    height: 50vh;
+    display: grid;
+    overflow: hidden;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    position: relative;
+}
+
+.column {
+    border: 2px solid red;
+    }
+
+#answer {
+    display: flex;
+    margin-top: auto;
+}
+
+#answer textarea {
+    background-color: transparent;
+    resize: none;
+    flex: 1;
+    overflow: hidden;
+}
+
+.chatContainer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 0.5rem;
+}
+
+#chat {
+    display: flex;
+    flex-direction: column-reverse;
+    flex: 1;
+    padding-bottom: 0.5rem;
+}
+
+.pseudo {
+    color: blue;
+}
+
+.card {
+    background-color: hsl(286.92deg 100% 30.59%);
+    border-radius: 0.5rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+}
+
+.card.empty {
+    background-color: hsl(284.47deg 95.51% 17.45%);
+}
+
+.cardScore {
+    margin-left: auto;
+    font-size: x-large;
+    font-weight: bold;
+    font-family: sans-serif;
+}
+
+.card span {
+    padding: 0.5rem;
+}
