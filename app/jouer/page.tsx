@@ -17,7 +17,7 @@ export default function Play() {
                 {Scores()}
             </div>
             <div className={styles.column}>
-                {Chat()}
+                <Chat/>
             </div>
         </div>
     )

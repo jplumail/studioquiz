@@ -27,13 +27,21 @@ export default function Scores() {
             padding: "1rem",
             gap: "0.2rem"
         }}>
-            {scores.sort(((a, b) => b.score - a.score)).map(x => PlayerCard(x.player, x.score))}
-            {Array.from({ length: 8 - scores.length }, () => PlayerCard(null, null))}
+            {scores.sort((a, b) => b.score - a.score).map((x, index) => (
+                <PlayerCard key={index} player={x.player} score={x.score} />
+            ))}
+            {Array.from({ length: 8 - scores.length }, (_, index) => (
+                <PlayerCard key={`empty-${index}`} player={null} score={null} />
+            ))}
         </div>
     )
 }
 
-function PlayerCard(player: Player | null, score: Score | null) {
+interface PlayerCardProps {
+    player: Player | null;
+    score: Score | null;
+}
+const PlayerCard: React.FC<PlayerCardProps> = ({ player, score }) => {
     if (player == null && score == null) {
         return (
             <div className={`${styles.card} ${styles.empty}`}>
