@@ -19,7 +19,7 @@ httpServer.listen(port, () => {
 });
 
 // WebSocket server
-const server = new WebSocketServer({ port: Number(port) });
+const server = new WebSocketServer({ server: httpServer });
 
 server.on('connection', (ws: WebSocket) => {
   console.log('Client connected');
