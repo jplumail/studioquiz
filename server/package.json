@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "nodemon --watch 'src/**/*.ts' --exec 'tsc && node dist/server.js' -e ts,js,json"
+    "dev": "nodemon --watch 'src/**/*.ts' --exec 'tsc && node dist/server.js' -e ts,js,json",
+    "start": "node dist/server.js"
   },
   "author": "",
   "license": "ISC",
