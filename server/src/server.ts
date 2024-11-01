@@ -1,11 +1,25 @@
 import { WebSocketServer, WebSocket } from 'ws';
+import http from 'http';
 
 interface Message {
   pseudo: string;
   content: any;
 }
 
-const server = new WebSocketServer({ port: 8080 });
+const port = process.env.PORT || 8080;
+
+// Create an HTTP server
+const httpServer = http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('OK');
+});
+
+httpServer.listen(port, () => {
+  console.log(`HTTP server is running on port ${port}`);
+});
+
+// WebSocket server
+const server = new WebSocketServer({ port: Number(port) });
 
 server.on('connection', (ws: WebSocket) => {
   console.log('Client connected');
@@ -24,4 +38,4 @@ server.on('connection', (ws: WebSocket) => {
   });
 });
 
-console.log('WebSocket server is running on ws://localhost:8080');
+console.log(`WebSocket server is running on port ${port}`);
