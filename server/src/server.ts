@@ -1,5 +1,6 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import http from 'http';
+import { type StudioQuizEvent } from '../../shared/types';
 
 interface Message {
   pseudo: string;
@@ -25,12 +26,10 @@ server.on('connection', (ws: WebSocket) => {
   console.log('Client connected');
 
   ws.on('message', (data: string) => {
-    const message: Message = JSON.parse(data);
-    console.log(`Mon engin: ${message.pseudo} ${message.content}`);
+    const message: StudioQuizEvent = JSON.parse(data);
+    console.log('Received:', message);
 
-    // Example of sending a type-safe message back
-    const response = { type: 'response', payload: 'Server received your message' };
-    ws.send(JSON.stringify(response));
+    ws.send(JSON.stringify(message));
   });
 
   ws.on('close', () => {

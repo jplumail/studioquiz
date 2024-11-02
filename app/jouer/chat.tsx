@@ -2,13 +2,9 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import styles from './page.module.css';
+import { type StudioQuizEvent, type PlayerMessage } from '@/shared/types';
 
-interface Message {
-    pseudo: string;
-    content: string;
-}
-
-const initialMessages: Message[] = [
+const initialMessages: PlayerMessage[] = [
     { pseudo: "QuizMaster", content: "Welcome to the quiz! First question coming up!" },
     { pseudo: "Gamer123", content: "Ready to win this!" },
     { pseudo: "SmartyPants", content: "Let's do this! 🧠" },
@@ -20,7 +16,7 @@ const initialMessages: Message[] = [
 ];
 
 export default function Chat() {
-    const [messages, setMessages] = useState<Message[]>(initialMessages);
+    const [messages, setMessages] = useState<PlayerMessage[]>(initialMessages);
     const ws = useRef<WebSocket | null>(null);
 
     useEffect(() => {
@@ -31,8 +27,10 @@ export default function Chat() {
         };
 
         ws.current.onmessage = (event) => {
-            const message: Message = JSON.parse(event.data);
-            setMessages(prevMessages => [...prevMessages, message]);
+            const message: StudioQuizEvent = JSON.parse(event.data);
+            if (message.type === 'playerMessage') {
+                setMessages(prevMessages => [...prevMessages, message.payload]);
+            }
         };
 
         ws.current.onclose = () => {
@@ -46,10 +44,10 @@ export default function Chat() {
         };
     }, []);
 
-    const sendMessage = (message: Message) => {
-        console.log("sending message", message);
+    const sendMessage = (message: PlayerMessage) => {
         if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-            ws.current.send(JSON.stringify(message));
+            const event: StudioQuizEvent = { type: 'playerMessage', payload: message };
+            ws.current.send(JSON.stringify(event));
         }
     };
 
@@ -62,27 +60,27 @@ export default function Chat() {
 }
 
 type ChatFlowProps = {
-    messages: Message[];
+    messages: PlayerMessage[];
 };
 function ChatFlow({ messages }: ChatFlowProps) {
     return (
         <div id={styles.chat}>
-            {messages.map((m, index) => <Message key={index} message={m} />)}
+            {messages.slice().reverse().map((m, index) => <PlayerMessageComponent key={index} message={m} />)}
         </div>
     );
 }
 
-function Message({ message }: { message: Message }) {
+function PlayerMessageComponent({ message }: { message: PlayerMessage }) {
     const pseudoColor = "#0090ff";
     return (
         <div>
-            <span style={{color: pseudoColor}}>{message.pseudo}</span><span style={{color: pseudoColor}}>{" > "}</span><span>{message.content}</span>
+            <span style={{ color: pseudoColor }}>{message.pseudo}</span><span style={{ color: pseudoColor }}>{" > "}</span><span>{message.content}</span>
         </div>
     );
 }
 
 type TextAreaProps = {
-    sendMessage: (message: Message) => void;
+    sendMessage: (message: PlayerMessage) => void;
 };
 
 function TextArea({ sendMessage }: TextAreaProps) {
@@ -91,7 +89,7 @@ function TextArea({ sendMessage }: TextAreaProps) {
     const handleSubmit = (e: React.FormEvent) => {
         console.log("handleSubmit")
         e.preventDefault();
-        const message: Message = { pseudo: "You", content };
+        const message: PlayerMessage = { pseudo: "You", content };
         sendMessage(message);
         setContent('');
     };
@@ -104,6 +102,12 @@ function TextArea({ sendMessage }: TextAreaProps) {
                     rows={1}
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleSubmit(e as React.FormEvent);
+                        }
+                    }}
                 ></textarea>
                 <button type="submit">Répondre</button>
             </form>
