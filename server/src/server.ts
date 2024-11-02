@@ -1,6 +1,6 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import http from 'http';
-import { type StudioQuizEvent } from '../../shared/types';
+import { type StudioQuizEvent } from './shared/types';
 
 interface Message {
   pseudo: string;
