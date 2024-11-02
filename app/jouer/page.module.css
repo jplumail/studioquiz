@@ -1,5 +1,6 @@
 .container {
     width: 50vw;
+    height: 50vh;
     display: grid;
     overflow: hidden;
     grid-template-columns: 1fr 1fr;
@@ -9,7 +10,8 @@
 
 .column {
     border: 2px solid red;
-    }
+    overflow: auto;
+}
 
 #answer {
     display: flex;
@@ -35,6 +37,7 @@
     flex-direction: column-reverse;
     flex: 1;
     padding-bottom: 0.5rem;
+    overflow: hidden;
 }
 
 .pseudo {
