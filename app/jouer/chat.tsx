@@ -4,23 +4,17 @@ import React, { useEffect, useState, useRef } from 'react';
 import styles from './page.module.css';
 import { type StudioQuizEvent, type PlayerMessage } from '@/shared/types';
 
-const initialMessages: PlayerMessage[] = [
-    { pseudo: "QuizMaster", content: "Welcome to the quiz! First question coming up!" },
-    { pseudo: "Gamer123", content: "Ready to win this!" },
-    { pseudo: "SmartyPants", content: "Let's do this! 🧠" },
-    { pseudo: "TriviaQueen", content: "Paris!" },
-    { pseudo: "SpeedyJoe", content: "Paris!" },
-    { pseudo: "QuizMaster", content: "Correct! TriviaQueen was first!" },
-    { pseudo: "HistoryBuff", content: "Oh, that was fast!" },
-    { pseudo: "Gamer123", content: "1912?" }
-];
 
 export default function Chat() {
-    const [messages, setMessages] = useState<PlayerMessage[]>(initialMessages);
+    const [pseudo, setPseudo] = useState<string>('');
+    const [messages, setMessages] = useState<PlayerMessage[]>([]);
     const ws = useRef<WebSocket | null>(null);
 
     useEffect(() => {
         ws.current = new WebSocket('ws://localhost:8080');
+
+        const randomPseudo = Math.random().toString(36).substring(7);
+        setPseudo(randomPseudo);
 
         ws.current.onopen = () => {
             console.log('Connected to WebSocket server');
@@ -44,9 +38,9 @@ export default function Chat() {
         };
     }, []);
 
-    const sendMessage = (message: PlayerMessage) => {
+    const sendMessage = (content: string) => {
         if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-            const event: StudioQuizEvent = { type: 'playerMessage', payload: message };
+            const event: StudioQuizEvent = { type: 'playerMessage', payload: {pseudo: pseudo, content: content} };
             ws.current.send(JSON.stringify(event));
         }
     };
@@ -80,7 +74,7 @@ function PlayerMessageComponent({ message }: { message: PlayerMessage }) {
 }
 
 type TextAreaProps = {
-    sendMessage: (message: PlayerMessage) => void;
+    sendMessage: (content: string) => void;
 };
 
 function TextArea({ sendMessage }: TextAreaProps) {
@@ -89,8 +83,7 @@ function TextArea({ sendMessage }: TextAreaProps) {
     const handleSubmit = (e: React.FormEvent) => {
         console.log("handleSubmit")
         e.preventDefault();
-        const message: PlayerMessage = { pseudo: "You", content };
-        sendMessage(message);
+        sendMessage(content);
         setContent('');
     };
 
