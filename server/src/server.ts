@@ -25,11 +25,16 @@ const server = new WebSocketServer({ server: httpServer });
 server.on('connection', (ws: WebSocket) => {
   console.log('Client connected');
 
-  ws.on('message', (data: string) => {
-    const message: StudioQuizEvent = JSON.parse(data);
+  ws.on('message', (data, isBinary) => {
+    const message: StudioQuizEvent = JSON.parse(data.toString());
     console.log('Received:', message);
 
-    ws.send(JSON.stringify(message));
+    server.clients.forEach(client => {
+      console.log("client.readyState", client.readyState);
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(message), { binary: isBinary });
+      }
+    });
   });
 
   ws.on('close', () => {
