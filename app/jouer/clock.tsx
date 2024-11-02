@@ -1,13 +1,14 @@
-'use client'
+'use client';
+
 import React, { useEffect, useState } from 'react';
 import './clock.css';
 
 export default function Clock() {
-    const [seconds, setSeconds] = useState(new Date().getSeconds());
+    const [seconds, setSeconds] = useState(0);
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setSeconds(new Date().getSeconds());
+            setSeconds(s => s + 1);
         }, 1000);
 
         return () => clearInterval(interval);
