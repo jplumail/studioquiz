@@ -11,7 +11,12 @@ export default function Chat() {
     const ws = useRef<WebSocket | null>(null);
 
     useEffect(() => {
-        ws.current = new WebSocket('ws://localhost:8080');
+        const isProduction = process.env.NODE_ENV === 'production';
+        const wsUrl = isProduction 
+            ? 'ws://studioquiz-server-577380683277.europe-west9.run.app' 
+            : 'ws://localhost:8080';
+
+        ws.current = new WebSocket(wsUrl);
 
         const randomPseudo = Math.random().toString(36).substring(7);
         setPseudo(randomPseudo);
