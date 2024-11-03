@@ -13,7 +13,7 @@ export default function Chat() {
     useEffect(() => {
         const isProduction = process.env.NODE_ENV === 'production';
         const wsUrl = isProduction 
-            ? 'ws://studioquiz-server-577380683277.europe-west9.run.app' 
+            ? 'wss://studioquiz-server-577380683277.europe-west9.run.app' 
             : 'ws://localhost:8080';
 
         ws.current = new WebSocket(wsUrl);
