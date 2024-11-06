@@ -1,6 +1,10 @@
+// @ts-check
+/**
+ * @import { StudioQuizEvent, Score, Player } from '../../shared/types';
+ */
+
 import { WebSocketServer, WebSocket } from 'ws';
 import http from 'http';
-import { StudioQuizEvent, Score, type Player } from './shared/types';
 
 const port = process.env.PORT || 8080;
 
@@ -17,10 +21,16 @@ httpServer.listen(port, () => {
 // WebSocket server
 const server = new WebSocketServer({ server: httpServer });
 
-let scores: Score[] = [];
-let websocketToPlayer: Map<WebSocket, Player> = new Map();
+/** @type {Score[]} */
+let scores = [];
+/** @type {Map<WebSocket, Player>} */
+let websocketToPlayer = new Map();
 
-function sendToAll(message: StudioQuizEvent) {
+/**
+ * Sends a message to all connected clients.
+ * @param {StudioQuizEvent} message
+ */
+function sendToAll(message) {
   websocketToPlayer.forEach((_, client) => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(JSON.stringify(message));
@@ -28,14 +38,15 @@ function sendToAll(message: StudioQuizEvent) {
   });
 }
 
-server.on('connection', (ws: WebSocket) => {
+server.on('connection', (ws) => {
   console.log('Client connected');
 
   ws.send(JSON.stringify({ type: 'welcome', payload: 'Welcome to the server!' }));
   ws.send(JSON.stringify({ type: 'scores', payload: scores }));
 
-  ws.on('message', (data, isBinary) => {
-    const message: StudioQuizEvent = JSON.parse(data.toString());
+  ws.on('message', (data) => {
+    /** @type {StudioQuizEvent} */
+    const message = JSON.parse(data.toString());
     
     if (message.type === 'registerPlayer') {
       const player = message.payload;
