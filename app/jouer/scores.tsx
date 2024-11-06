@@ -1,20 +1,11 @@
+import { Player, Score } from '@/shared/types';
 import styles from './page.module.css';
 
-type Player = string;
-type Score = number;
-type Scores = {
-    player: Player;
-    score: Score;
-}[]
+interface ScoresProps {
+    scores: Score[];
+}
 
-export default function Scores() {
-    const scores: Scores = [
-        { player: "pluplu", score: 10 },
-        { player: "pseudo", score: 1 },
-        { player: "grizzur", score: 0 },
-        { player: "vanessa", score: 12 },
-        { player: "jean claude", score: 0 }
-    ]
+export default function Scores({ scores }: ScoresProps) {
     return (
         <div style={{
             width: '100%',
@@ -31,18 +22,18 @@ export default function Scores() {
                 <PlayerCard key={index} player={x.player} score={x.score} />
             ))}
             {Array.from({ length: 8 - scores.length }, (_, index) => (
-                <PlayerCard key={`empty-${index}`} player={null} score={null} />
+                <PlayerCard key={`empty-${index}`} player={null} score={null}/>
             ))}
         </div>
     )
 }
 
 interface PlayerCardProps {
-    player: Player | null;
-    score: Score | null;
+    score: number | null;
+    player: string | null;
 }
-const PlayerCard: React.FC<PlayerCardProps> = ({ player, score }) => {
-    if (player == null && score == null) {
+const PlayerCard: React.FC<PlayerCardProps> = ({score, player}) => {
+    if (score == null || player == null) {
         return (
             <div className={`${styles.card} ${styles.empty}`}>
             </div>

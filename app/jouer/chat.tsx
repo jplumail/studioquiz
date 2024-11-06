@@ -1,55 +1,22 @@
-"use client";
-
 import React, { useEffect, useState, useRef } from 'react';
 import styles from './page.module.css';
 import { type StudioQuizEvent, type PlayerMessage } from '@/shared/types';
 
 
-export default function Chat() {
-    const [pseudo, setPseudo] = useState<string>('');
-    const [messages, setMessages] = useState<PlayerMessage[]>([]);
-    const ws = useRef<WebSocket | null>(null);
-
-    useEffect(() => {
-        const isProduction = process.env.NODE_ENV === 'production';
-        const wsUrl = isProduction 
-            ? 'wss://studioquiz-server-577380683277.europe-west9.run.app' 
-            : 'ws://localhost:8080';
-
-        ws.current = new WebSocket(wsUrl);
-
-        const randomPseudo = Math.random().toString(36).substring(7);
-        setPseudo(randomPseudo);
-
-        ws.current.onopen = () => {
-            console.log('Connected to WebSocket server');
-        };
-
-        ws.current.onmessage = (event) => {
-            const message: StudioQuizEvent = JSON.parse(event.data);
-            if (message.type === 'playerMessage') {
-                setMessages(prevMessages => [...prevMessages, message.payload]);
-            }
-        };
-
-        ws.current.onclose = () => {
-            console.log('Disconnected from WebSocket server');
-        };
-
-        return () => {
-            if (ws.current) {
-                ws.current.close();
-            }
-        };
-    }, []);
+interface ChatProps {
+    ws: { current: WebSocket | null };
+    pseudo: string;
+    messages: PlayerMessage[];
+}
+export default function Chat({ ws, pseudo, messages }: ChatProps) {
 
     const sendMessage = (content: string) => {
         if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-            const event: StudioQuizEvent = { type: 'playerMessage', payload: {pseudo: pseudo, content: content} };
+            const event: StudioQuizEvent = { type: 'playerMessage', payload: {player: pseudo, content: content} };
             ws.current.send(JSON.stringify(event));
         }
     };
-
+    
     return (
         <div className={styles.chatContainer}>
             <ChatFlow messages={messages} />
@@ -73,7 +40,7 @@ function PlayerMessageComponent({ message }: { message: PlayerMessage }) {
     const pseudoColor = "#0090ff";
     return (
         <div>
-            <span style={{ color: pseudoColor }}>{message.pseudo}</span><span style={{ color: pseudoColor }}>{" > "}</span><span>{message.content}</span>
+            <span style={{ color: pseudoColor }}>{message.player}</span><span style={{ color: pseudoColor }}>{" > "}</span><span>{message.content}</span>
         </div>
     );
 }

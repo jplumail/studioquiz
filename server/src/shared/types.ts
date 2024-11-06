@@ -1,15 +1,37 @@
-export interface PlayerMessage {
-    pseudo: string;
+type Player = string;
+
+interface Score {
+    player: Player;
+    score: number;
+}
+
+interface PlayerMessage {
+    player: Player;
     content: string;
 }
 
-export interface PlayerMessageEvent {
+interface RegisterPlayerEvent {
+    type: "registerPlayer";
+    payload: Player;
+}
+
+interface PlayerMessageEvent {
     type: "playerMessage";
     payload: PlayerMessage;
 }
 
-export interface StudioQuizEvent {
-    type: string;
-    payload: any;
+interface ScoresEvent {
+    type: "scores";
+    payload: Score[];
 }
 
+type StudioQuizEvent = PlayerMessageEvent | ScoresEvent | RegisterPlayerEvent;
+
+export type {
+    Player,
+    Score,
+    PlayerMessage,
+    PlayerMessageEvent,
+    ScoresEvent,
+    StudioQuizEvent
+};
