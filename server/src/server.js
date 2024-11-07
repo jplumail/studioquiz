@@ -18,64 +18,84 @@ httpServer.listen(port, () => {
   console.log(`HTTP server is running on port ${port}`);
 });
 
-// WebSocket server
-const server = new WebSocketServer({ server: httpServer });
 
-/** @type {Score[]} */
-let scores = [];
-/** @type {Map<WebSocket, Player>} */
-let websocketToPlayer = new Map();
+class Server {
+  /**
+   * @param {http.Server} httpServer
+   */
+  constructor(httpServer) {
+    this.server = new WebSocketServer({ server: httpServer });
+    /** @type {Score[]} */
+    this.scores = [];
+    /** @type {Map<WebSocket, Player>} */
+    this.websocketToPlayer = new Map();
+    this.game = {
+      scores: this.scores,
+      currentQuestion: null,
+      currentAnswer: null,
+    };
 
-/**
- * Sends a message to all connected clients.
- * @param {StudioQuizEvent} message
- */
-function sendToAll(message) {
-  websocketToPlayer.forEach((_, client) => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify(message));
-    }
-  });
-}
+    this.server.on('connection', (ws) => this.registerClient(ws));
+  }
 
-server.on('connection', (ws) => {
-  console.log('Client connected');
+  /**
+   * Registers a new client.
+   * @param {WebSocket} ws
+   */
+  registerClient(ws) {
+    console.log('Client connected');
 
-  ws.send(JSON.stringify({ type: 'welcome', payload: 'Welcome to the server!' }));
-  ws.send(JSON.stringify({ type: 'scores', payload: scores }));
+    ws.send(JSON.stringify({ type: 'welcome', payload: 'Welcome to the server!' }));
+    ws.send(JSON.stringify({ type: 'scores', payload: this.scores }));
 
-  ws.on('message', (data) => {
-    /** @type {StudioQuizEvent} */
-    const message = JSON.parse(data.toString());
-    
-    if (message.type === 'registerPlayer') {
-      const player = message.payload;
-      scores.push({ player: player, score: 0 });
-      websocketToPlayer.set(ws, player);
-      sendToAll({ type: 'scores', payload: scores });
-    } else if (message.type === 'playerMessage') {
-      sendToAll(message);
-    }
-  });
+    ws.on('message', (data) => this.handleMessage(ws, data));
+    ws.on('close', () => this.unregisterClient(ws));
+  }
 
-  ws.on('close', () => {
-    const player = websocketToPlayer.get(ws);
+  /**
+   * Unregisters a client.
+   * @param {WebSocket} ws
+   */
+  unregisterClient(ws) {
+    const player = this.websocketToPlayer.get(ws);
     if (player) {
-      websocketToPlayer.delete(ws);
-      scores = scores.filter(score => score.player !== player);
-      sendToAll({ type: 'scores', payload: scores });
+      this.websocketToPlayer.delete(ws);
+      this.scores = this.scores.filter(score => score.player !== player);
+      this.sendToAll({ type: 'scores', payload: this.scores });
     }
     console.log('Client disconnected');
-  });
-});
-
-console.log(`WebSocket server is running on port ${port}`);
-
-// every 1 second, send a random score update
-setInterval(() => {
-  const player = scores[Math.floor(Math.random() * scores.length)];
-  if (player) {
-    player.score += Math.floor(Math.random() * 10);
-    sendToAll({ type: 'scores', payload: scores });
   }
-}, 1000);
+
+  /**
+   * Handles incoming messages from clients.
+   * @param {WebSocket} ws
+   * @param {import('ws').RawData} data
+   */
+  handleMessage(ws, data) {
+    /** @type {StudioQuizEvent} */
+    const message = JSON.parse(data.toString());
+
+    if (message.type === 'registerPlayer') {
+      const player = message.payload;
+      this.scores.push({ player: player, score: 0 });
+      this.websocketToPlayer.set(ws, player);
+      this.sendToAll({ type: 'scores', payload: this.scores });
+    } else if (message.type === 'playerMessage') {
+      this.sendToAll(message);
+    }
+  }
+
+  /**
+   * Sends a message to all connected clients.
+   * @param {StudioQuizEvent} message
+   */
+  sendToAll(message) {
+    this.websocketToPlayer.forEach((_, client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(message));
+      }
+    });
+  }
+}
+
+const server = new Server(httpServer);
