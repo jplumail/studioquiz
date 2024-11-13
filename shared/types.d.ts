@@ -3,13 +3,13 @@ type Question = string;
 type Answer = string;
 type DateMilliseconds = number; // in milliseconds
 
+type State = "WAITING" | "PLAYING" | "FINISHED";
+
+type GameStatus = "QUESTION" | "WAIT";
+
 interface Score {
     player: Player;
     score: number;
-}
-
-interface StartGameMessage {
-    type: "startGame";
 }
 
 interface PlayerMessage {
@@ -20,7 +20,7 @@ interface PlayerMessage {
     }
 }
 
-type Message = StartGameMessage | PlayerMessage | CorrectAnswerEvent;
+type Message = StartGameEvent | PlayerMessage | CorrectAnswerEvent | EndQuestionEvent | StartQuestionEvent;
 
 interface RegisterPlayerEvent {
     type: "registerPlayer";
@@ -53,6 +53,7 @@ interface StartQuestionEvent {
     type: "startQuestion";
     payload: {
         question: Question,
+        index: number,
         end: DateMilliseconds
     };
 }
@@ -82,11 +83,17 @@ type StudioQuizEvent =
 export type {
     Player,
     Question,
+    Answer,
     Score,
     DateMilliseconds,
     Message,
     PlayerMessage,
     PlayerMessageEvent,
     ScoresEvent,
-    StudioQuizEvent
+    StudioQuizEvent,
+    GameStatus
+};
+
+export {
+    State
 };

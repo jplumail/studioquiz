@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * @import { StudioQuizEvent, Score, Player, PlayerMessageEvent } from '../../shared/types';
+ * @import { StudioQuizEvent, Score, Player, PlayerMessageEvent, State, GameStatus } from '../../shared/types';
  */
 
 import { WebSocketServer, WebSocket } from 'ws';
@@ -46,18 +46,22 @@ class Server {
     /** 
      * @type {{
      *  scores: Score[],
-     *  currentIndex: number | null,
+     *  currentIndex: number,
      *  questions: string[],
      *  answers: string[],
-     *  hasAnswered: Map<Player, boolean>
+     *  hasAnswered: Map<Player, boolean>,
+     *  state: State,
+     *  gameStatus: GameStatus
      * }}
     */
     this.game = {
       scores: this.scores,
-      currentIndex: null,
+      currentIndex: 0,
       questions: placeholderQuestions,
       answers: placeholderAnswers,
-      hasAnswered: new Map()
+      hasAnswered: new Map(),
+      state: 'WAITING',
+      gameStatus: 'WAIT'
     };
 
     this.server.on('connection', (ws) => this.registerClient(ws));
@@ -94,24 +98,28 @@ class Server {
   startGame() {
     this.sendToAll({ type: 'startGame' });
     this.game.currentIndex = -1;
+    this.game.state = 'PLAYING';
     this.nextQuestion();
   }
 
   nextQuestion() {
-    if (this.game.currentIndex) {
+    if (this.game.currentIndex !== null) {
       this.game.currentIndex++;
       if (this.game.currentIndex >= this.game.questions.length) {
         this.endGame();
         return;
       }
-      this.sendToAll({ type: 'startQuestion', payload: {question: this.game.questions[this.game.currentIndex], end: Date.now()+this.countdown*1000} });
+      this.game.hasAnswered.forEach((_, key) => this.game.hasAnswered.set(key, false));
+      this.sendToAll({ type: 'startQuestion', payload: { question: this.game.questions[this.game.currentIndex], end: Date.now() + this.countdown * 1000, index: this.game.currentIndex + 1 } });
+      this.game.gameStatus = 'QUESTION';
       setTimeout(() => this.endQuestion(), this.countdown * 1000);
 
     }
   }
 
   endQuestion() {
-    if (this.game.currentIndex) {
+    if (this.game.currentIndex !== null) {
+      this.game.gameStatus = 'WAIT';
       this.sendToAll({ type: 'endQuestion', payload: this.game.answers[this.game.currentIndex] });
       setTimeout(() => this.nextQuestion(), 5000);
     }
@@ -119,34 +127,32 @@ class Server {
 
   endGame() {
     this.sendToAll({ type: 'endGame' });
+    this.game.state = 'FINISHED';
   }
 
   /**
    * Handles incoming messages from players.
-   * @param {WebSocket} ws
+   * @param {Player} player
    * @param {PlayerMessageEvent} message
    */
-  handlePlayerMessage(ws, message) {
-    const player = this.registeredPlayers.get(ws);
-    if (player) {
-      if (this.game.currentIndex !== null) {
-        if (this.checkAnswer(message.payload.content.message, this.game.answers[this.game.currentIndex])) {
-          if (!this.game.hasAnswered.get(player)) {
-            const score = this.scores.find(score => score.player === player);
-            if (score) {
-              score.score++;
-              this.sendToAll({ type: 'scores', payload: this.scores });
-            }
-            this.sendToAll({ type: 'correctAnswer', payload: player });
-            this.game.hasAnswered.set(player, true);
+  handlePlayerMessage(player, message) {
+    if (this.game.state == 'PLAYING' && this.game.gameStatus == 'QUESTION') {
+      if (!this.game.hasAnswered.get(player)) {
+        if ((this.game.currentIndex >= 0) && (this.game.currentIndex < this.game.answers.length) && this.checkAnswer(message.payload.content.message, this.game.answers[this.game.currentIndex])) {
+          const score = this.scores.find(score => score.player === player);
+          if (score) {
+            score.score++;
+            this.sendToAll({ type: 'scores', payload: this.scores });
           }
+          this.sendToAll({ type: 'correctAnswer', payload: player });
+          this.game.hasAnswered.set(player, true);
         }
-        if (!this.game.hasAnswered.get(player)) {
-          this.sendToAll(message);
-        }
-      } else {
+      }
+      if (!this.game.hasAnswered.get(player)) {
         this.sendToAll(message);
       }
+    } else {
+      this.sendToAll(message);
     }
   }
 
@@ -175,7 +181,10 @@ class Server {
       this.registeredPlayers.set(ws, player);
       this.sendToAll({ type: 'scores', payload: this.scores });
     } else if (message.type === 'playerMessage') {
-      this.handlePlayerMessage(ws, message);
+      const player = this.registeredPlayers.get(ws);
+      if (player) {
+        this.handlePlayerMessage(player, message);
+      }
     } else if (message.type === 'askStartGame') {
       this.startGame();
     }

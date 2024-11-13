@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import styles from './page.module.css';
-import { type StudioQuizEvent, type Message, type PlayerMessage, type Player } from '@/shared/types';
+import { type StudioQuizEvent, type Message, type PlayerMessage, type Player, type Answer } from '@/shared/types';
 
 
 interface ChatProps {
@@ -50,6 +50,10 @@ function ChatFlow({ messages }: ChatFlowProps) {
                             return <StartGameMessageComponent key={index} />;
                         case "correctAnswer":
                             return <CorrectAnswerComponent key={index} player={m.payload} />;
+                        case "startQuestion":
+                            return <StartQuestionComponent key={index} questionIndex={m.payload.index} />;
+                        case "endQuestion":
+                            return <EndQuestionComponent key={index} answer={m.payload} />
                     }
                 }
             )}
@@ -77,7 +81,23 @@ function StartGameMessageComponent() {
 function CorrectAnswerComponent({ player }: { player: Player }) {
     return (
         <div>
-            <span style={{ color: "yellow" }}>{player}</span><span style={{ color: "yellow" }}> a trouvé la bonne réponse !</span>
+            <span style={{ color: "yellow" }}>{player} a trouvé la bonne réponse !</span>
+        </div>
+    );
+}
+
+function EndQuestionComponent({ answer }: { answer: Answer }) {
+    return (
+        <div>
+            <span style={{ color: "yellow" }}>Question terminée !</span>
+        </div>
+    );
+}
+
+function StartQuestionComponent({ questionIndex }: { questionIndex: number }) {
+    return (
+        <div>
+            <span style={{ color: "yellow" }}>--- Question n°{questionIndex} ---</span>
         </div>
     );
 }

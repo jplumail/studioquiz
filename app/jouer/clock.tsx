@@ -13,14 +13,15 @@ export default function Clock({ startDate, endDate }: { startDate: DateMilliseco
 
         return () => clearInterval(interval);
     }, []);
-    const percentage = (Math.floor(((currentDate - startDate) / (endDate - startDate)) * 1000) / 10).toString() + '%';
+    const percentage = Math.floor(((currentDate - startDate) / (endDate - startDate)) * 1000) / 10;
 
     return (
-        <div className="clock">
+        percentage < 100 ?
+        (<div className="clock">
             <div
                 className="clock-sector"
-                style={{ backgroundImage: `conic-gradient(orange ${percentage}, transparent ${percentage})` }}
+                style={{ backgroundImage: `conic-gradient(orange ${percentage.toString()}%, transparent ${percentage.toString()}%)` }}
             />
-        </div>
+        </div>) : null
     );
 }

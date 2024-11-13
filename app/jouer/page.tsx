@@ -3,11 +3,11 @@
 import Chat from './chat';
 import styles from './page.module.css';
 import Scores from './scores';
-import Presenter from './presenter';
 import Clock from './clock';
-import QuestionComponent from './question';
+import DialogBox from './dialogueBox';
 import { useEffect, useRef, useState } from 'react';
-import { Message, StudioQuizEvent, Score, Question, DateMilliseconds } from '@/shared/types';
+import { Message, StudioQuizEvent, Score, Question, DateMilliseconds, Answer, State, GameStatus } from '@/shared/types';
+
 
 export default function Play() {
     const [pseudo, setPseudo] = useState<string>('');
@@ -15,13 +15,19 @@ export default function Play() {
     const [scores, setScores] = useState<Score[]>([]);
     const ws = useRef<WebSocket | null>(null);
     const [question, setQuestion] = useState<Question | null>(null);
+    const [answer, setAnswer] = useState<Answer | null>(null);
     const [questionStartDate, setQuestionStartDate] = useState<DateMilliseconds | null>(null);
     const [questionEndDate, setQuestionEndDate] = useState<DateMilliseconds | null>(null);
 
+    const [state, setState] = useState<State>("WAITING");
+    const [gameStatus, setGameStatus] = useState<GameStatus | null>(null);
+
+    const [sentence, setSentence] = useState<string | null>(null);
+
     useEffect(() => {
         const isProduction = process.env.NODE_ENV === 'production';
-        const wsUrl = isProduction 
-            ? 'wss://studioquiz-server-577380683277.europe-west9.run.app' 
+        const wsUrl = isProduction
+            ? 'wss://studioquiz-server-577380683277.europe-west9.run.app'
             : 'ws://localhost:8080';
 
         ws.current = new WebSocket(wsUrl);
@@ -44,14 +50,26 @@ export default function Play() {
                     break;
                 case 'startGame':
                     setMessages(prevMessages => [...prevMessages, { type: 'startGame' }]);
+                    setState("PLAYING");
+                    setGameStatus("WAIT");
                     break;
                 case 'startQuestion':
                     setQuestion(message.payload.question);
                     setQuestionStartDate(Date.now());
                     setQuestionEndDate(message.payload.end);
+                    setGameStatus("QUESTION");
+                    setMessages(prevMessages => [...prevMessages, message]);
                     break;
                 case 'correctAnswer':
-                    setMessages(prevMessages => [...prevMessages, { type: 'correctAnswer', payload: message.payload }]);
+                    setMessages(prevMessages => [...prevMessages, message]);
+                    break;
+                case 'endQuestion':
+                    setMessages(prevMessages => [...prevMessages, message]);
+                    setGameStatus("WAIT");
+                    setAnswer(message.payload);
+                    break;
+                case 'endGame':
+                    setState("FINISHED");
                     break;
                 default:
                     console.warn(`Unhandled message type: ${message.type}`);
@@ -69,16 +87,31 @@ export default function Play() {
         };
     }, []);
 
+    useEffect(() => {
+        if (state == "WAITING") {
+            setSentence('En attente de joueurs...');
+        } else if (state == "PLAYING") {
+            if (gameStatus == "QUESTION") {
+                setSentence(question);
+            }
+            if (gameStatus == "WAIT" && answer) {
+                setSentence(`Terminé ! La bonne réponse était ${answer}`);
+            }
+        } else if (state == "FINISHED") {
+            setSentence('La partie est terminée ! Merci d\'avoir joué');
+        }
+    }, [gameStatus, state]);
+
     return (
         <div className={styles.container}>
-            {(questionStartDate && questionEndDate) && <div style={{position: "absolute", margin: "0.5rem", zIndex: 1}}><Clock startDate={questionStartDate} endDate={questionEndDate}/></div>}
-            {question && <div style={{position: "absolute", right: "1rem", top: "2rem", zIndex: 3}}><QuestionComponent question={question}/></div>}
-            <div className={styles.column} style={{backgroundColor: "hsl(285.77deg 96.04% 19.8%)", display: 'grid', justifyItems: "center"}}>
-                <div style={{position: "relative", left: "40px", zIndex: 0}}>{Presenter()}</div>
+            {(gameStatus == "QUESTION") && (questionStartDate && questionEndDate) && <div style={{ position: "absolute", margin: "0.5rem", zIndex: 1 }}><Clock startDate={questionStartDate} endDate={questionEndDate} /></div>}
+            {sentence && <div style={{ position: "absolute", right: "1rem", top: "2rem", zIndex: 3 }}><DialogBox sentence={sentence} /></div>}
+            <div className={styles.column} style={{ backgroundColor: "hsl(285.77deg 96.04% 19.8%)", display: 'grid', justifyItems: "center" }}>
+                <div style={{ position: "relative", left: "40px", zIndex: 0 }}><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWlHhJXvhgtIYxbJRcBM2u9fpe5X1M9ZCDBg&s"></img></div>
                 <Scores scores={scores} />
             </div>
             <div className={styles.column}>
-                <Chat ws={ws} pseudo={pseudo} messages={messages}/>
+                <Chat ws={ws} pseudo={pseudo} messages={messages} />
             </div>
         </div>
     )
