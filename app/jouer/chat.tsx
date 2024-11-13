@@ -1,22 +1,32 @@
 import React, { useEffect, useState, useRef } from 'react';
 import styles from './page.module.css';
-import { type StudioQuizEvent, type PlayerMessage } from '@/shared/types';
+import { type StudioQuizEvent, type Message, type PlayerMessage, type Player } from '@/shared/types';
 
 
 interface ChatProps {
     ws: { current: WebSocket | null };
     pseudo: string;
-    messages: PlayerMessage[];
+    messages: Message[];
 }
 export default function Chat({ ws, pseudo, messages }: ChatProps) {
 
     const sendMessage = (content: string) => {
         if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-            const event: StudioQuizEvent = { type: 'playerMessage', payload: {player: pseudo, content: content} };
-            ws.current.send(JSON.stringify(event));
+            let event: StudioQuizEvent | null = null;
+            if (content.startsWith('/')) {
+                if (content === '/start') {
+                    event = { type: 'askStartGame' };
+                }
+            } else {
+                event = { type: 'playerMessage', payload: { type: "player", content: { player: pseudo, message: content } } };
+            }
+            if (event) {
+                console.log("send", event);
+                ws.current.send(JSON.stringify(event));
+            }
         }
     };
-    
+
     return (
         <div className={styles.chatContainer}>
             <ChatFlow messages={messages} />
@@ -26,12 +36,23 @@ export default function Chat({ ws, pseudo, messages }: ChatProps) {
 }
 
 type ChatFlowProps = {
-    messages: PlayerMessage[];
+    messages: Message[];
 };
 function ChatFlow({ messages }: ChatFlowProps) {
     return (
         <div id={styles.chat}>
-            {messages.slice().reverse().map((m, index) => <PlayerMessageComponent key={index} message={m} />)}
+            {messages.slice().reverse().map(
+                (m, index) => {
+                    switch (m.type) {
+                        case "player":
+                            return <PlayerMessageComponent key={index} message={m} />;
+                        case "startGame":
+                            return <StartGameMessageComponent key={index} />;
+                        case "correctAnswer":
+                            return <CorrectAnswerComponent key={index} player={m.payload} />;
+                    }
+                }
+            )}
         </div>
     );
 }
@@ -40,7 +61,23 @@ function PlayerMessageComponent({ message }: { message: PlayerMessage }) {
     const pseudoColor = "#0090ff";
     return (
         <div>
-            <span style={{ color: pseudoColor }}>{message.player}</span><span style={{ color: pseudoColor }}>{" > "}</span><span>{message.content}</span>
+            <span style={{ color: pseudoColor }}>{message.content.player}</span><span style={{ color: pseudoColor }}>{" > "}</span><span>{message.content.message}</span>
+        </div>
+    );
+}
+
+function StartGameMessageComponent() {
+    return (
+        <div>
+            <span style={{ color: "yellow" }}>La partie commence !</span>
+        </div>
+    );
+}
+
+function CorrectAnswerComponent({ player }: { player: Player }) {
+    return (
+        <div>
+            <span style={{ color: "yellow" }}>{player}</span><span style={{ color: "yellow" }}> a trouvé la bonne réponse !</span>
         </div>
     );
 }

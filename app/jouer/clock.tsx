@@ -1,24 +1,25 @@
-'use client';
-
 import React, { useEffect, useState } from 'react';
 import './clock.css';
+import { DateMilliseconds } from '@/shared/types';
 
-export default function Clock() {
-    const [seconds, setSeconds] = useState(0);
+export default function Clock({ startDate, endDate }: { startDate: DateMilliseconds, endDate: DateMilliseconds }) {
+    const [currentDate, setCurrentDate] = useState(Date.now());
+    const refreshRate = 30;
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setSeconds(s => s + 1);
-        }, 1000);
+            setCurrentDate(Date.now());
+        }, 1000/refreshRate);
 
         return () => clearInterval(interval);
     }, []);
+    const percentage = (Math.floor(((currentDate - startDate) / (endDate - startDate)) * 1000) / 10).toString() + '%';
 
     return (
         <div className="clock">
             <div
                 className="clock-sector"
-                style={{backgroundImage: `conic-gradient(orange ${(seconds / 60) * 100}%, transparent ${(seconds / 60) * 100}%)`}}
+                style={{ backgroundImage: `conic-gradient(orange ${percentage}, transparent ${percentage})` }}
             />
         </div>
     );

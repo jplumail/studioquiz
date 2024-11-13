@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * @import { StudioQuizEvent, Score, Player } from '../../shared/types';
+ * @import { StudioQuizEvent, Score, Player, PlayerMessageEvent } from '../../shared/types';
  */
 
 import { WebSocketServer, WebSocket } from 'ws';
@@ -18,6 +18,18 @@ httpServer.listen(port, () => {
   console.log(`HTTP server is running on port ${port}`);
 });
 
+const placeholderQuestions = [
+  "What is the capital of France?",
+  "What is the capital of Germany?",
+  "What is the capital of Italy?",
+]
+
+const placeholderAnswers = [
+  "Paris",
+  "Berlin",
+  "Rome",
+]
+
 
 class Server {
   /**
@@ -28,11 +40,24 @@ class Server {
     /** @type {Score[]} */
     this.scores = [];
     /** @type {Map<WebSocket, Player>} */
-    this.websocketToPlayer = new Map();
+    this.registeredPlayers = new Map();
+    this.countdown = 10;  // 10 seconds
+
+    /** 
+     * @type {{
+     *  scores: Score[],
+     *  currentIndex: number | null,
+     *  questions: string[],
+     *  answers: string[],
+     *  hasAnswered: Map<Player, boolean>
+     * }}
+    */
     this.game = {
       scores: this.scores,
-      currentQuestion: null,
-      currentAnswer: null,
+      currentIndex: null,
+      questions: placeholderQuestions,
+      answers: placeholderAnswers,
+      hasAnswered: new Map()
     };
 
     this.server.on('connection', (ws) => this.registerClient(ws));
@@ -57,13 +82,81 @@ class Server {
    * @param {WebSocket} ws
    */
   unregisterClient(ws) {
-    const player = this.websocketToPlayer.get(ws);
+    const player = this.registeredPlayers.get(ws);
     if (player) {
-      this.websocketToPlayer.delete(ws);
+      this.registeredPlayers.delete(ws);
       this.scores = this.scores.filter(score => score.player !== player);
       this.sendToAll({ type: 'scores', payload: this.scores });
     }
     console.log('Client disconnected');
+  }
+
+  startGame() {
+    this.sendToAll({ type: 'startGame' });
+    this.game.currentIndex = -1;
+    this.nextQuestion();
+  }
+
+  nextQuestion() {
+    if (this.game.currentIndex) {
+      this.game.currentIndex++;
+      if (this.game.currentIndex >= this.game.questions.length) {
+        this.endGame();
+        return;
+      }
+      this.sendToAll({ type: 'startQuestion', payload: {question: this.game.questions[this.game.currentIndex], end: Date.now()+this.countdown*1000} });
+      setTimeout(() => this.endQuestion(), this.countdown * 1000);
+
+    }
+  }
+
+  endQuestion() {
+    if (this.game.currentIndex) {
+      this.sendToAll({ type: 'endQuestion', payload: this.game.answers[this.game.currentIndex] });
+      setTimeout(() => this.nextQuestion(), 5000);
+    }
+  }
+
+  endGame() {
+    this.sendToAll({ type: 'endGame' });
+  }
+
+  /**
+   * Handles incoming messages from players.
+   * @param {WebSocket} ws
+   * @param {PlayerMessageEvent} message
+   */
+  handlePlayerMessage(ws, message) {
+    const player = this.registeredPlayers.get(ws);
+    if (player) {
+      if (this.game.currentIndex !== null) {
+        if (this.checkAnswer(message.payload.content.message, this.game.answers[this.game.currentIndex])) {
+          if (!this.game.hasAnswered.get(player)) {
+            const score = this.scores.find(score => score.player === player);
+            if (score) {
+              score.score++;
+              this.sendToAll({ type: 'scores', payload: this.scores });
+            }
+            this.sendToAll({ type: 'correctAnswer', payload: player });
+            this.game.hasAnswered.set(player, true);
+          }
+        }
+        if (!this.game.hasAnswered.get(player)) {
+          this.sendToAll(message);
+        }
+      } else {
+        this.sendToAll(message);
+      }
+    }
+  }
+
+  /**
+   * Checks if attempt is correct
+   * @param {string} attempt
+   * @param {string} answer
+   */
+  checkAnswer(attempt, answer) {
+    return attempt.toLowerCase() === answer.toLowerCase()
   }
 
   /**
@@ -74,14 +167,17 @@ class Server {
   handleMessage(ws, data) {
     /** @type {StudioQuizEvent} */
     const message = JSON.parse(data.toString());
+    console.log("message received: ", message)
 
     if (message.type === 'registerPlayer') {
       const player = message.payload;
       this.scores.push({ player: player, score: 0 });
-      this.websocketToPlayer.set(ws, player);
+      this.registeredPlayers.set(ws, player);
       this.sendToAll({ type: 'scores', payload: this.scores });
     } else if (message.type === 'playerMessage') {
-      this.sendToAll(message);
+      this.handlePlayerMessage(ws, message);
+    } else if (message.type === 'askStartGame') {
+      this.startGame();
     }
   }
 
@@ -90,7 +186,8 @@ class Server {
    * @param {StudioQuizEvent} message
    */
   sendToAll(message) {
-    this.websocketToPlayer.forEach((_, client) => {
+    console.log('Sending to all:', message);
+    this.registeredPlayers.forEach((_, client) => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify(message));
       }
