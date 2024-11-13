@@ -2,15 +2,11 @@ type Player = string;
 type Question = string;
 type Answer = string;
 type DateMilliseconds = number; // in milliseconds
+type Score = number;
 
 type State = "WAITING" | "PLAYING" | "FINISHED";
 
 type GameStatus = "QUESTION" | "WAIT";
-
-interface Score {
-    player: Player;
-    score: number;
-}
 
 interface PlayerMessage {
     type: "player";
@@ -32,9 +28,11 @@ interface PlayerMessageEvent {
     payload: PlayerMessage;
 }
 
+type Scores = Map<Player, Score>;
+
 interface ScoresEvent {
     type: "scores";
-    payload: Score[];
+    payload: Record<Player, Score>;
 }
 
 interface AskStartGameEvent {
@@ -65,7 +63,10 @@ interface EndQuestionEvent {
 
 interface CorrectAnswerEvent {
     type: "correctAnswer";
-    payload: Player;
+    payload: {
+        player: Player;
+        points: number;
+    };
 }
 
 type StudioQuizEvent =
@@ -84,7 +85,7 @@ export type {
     Player,
     Question,
     Answer,
-    Score,
+    Scores,
     DateMilliseconds,
     Message,
     PlayerMessage,

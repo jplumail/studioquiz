@@ -49,7 +49,7 @@ function ChatFlow({ messages }: ChatFlowProps) {
                         case "startGame":
                             return <StartGameMessageComponent key={index} />;
                         case "correctAnswer":
-                            return <CorrectAnswerComponent key={index} player={m.payload} />;
+                            return <CorrectAnswerComponent key={index} player={m.payload.player} points={m.payload.points} />;
                         case "startQuestion":
                             return <StartQuestionComponent key={index} questionIndex={m.payload.index} />;
                         case "endQuestion":
@@ -78,10 +78,10 @@ function StartGameMessageComponent() {
     );
 }
 
-function CorrectAnswerComponent({ player }: { player: Player }) {
+function CorrectAnswerComponent({ player, points }: { player: Player, points: number }) {
     return (
         <div>
-            <span style={{ color: "yellow" }}>{player} a trouvé la bonne réponse !</span>
+            <span style={{ color: "yellow" }}>{player} trouve la bonne réponse ! +{points} points</span>
         </div>
     );
 }

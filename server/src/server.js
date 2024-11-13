@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * @import { StudioQuizEvent, Score, Player, PlayerMessageEvent, State, GameStatus } from '../../shared/types';
+ * @import { StudioQuizEvent, Scores, Player, PlayerMessageEvent, State, GameStatus } from '../../shared/types';
  */
 
 import { WebSocketServer, WebSocket } from 'ws';
@@ -30,6 +30,8 @@ const placeholderAnswers = [
   "Rome",
 ]
 
+const pointsArray = [4, 3, 3, 2, 1, 1, 1, 1];
+
 
 class Server {
   /**
@@ -37,15 +39,15 @@ class Server {
    */
   constructor(httpServer) {
     this.server = new WebSocketServer({ server: httpServer });
-    /** @type {Score[]} */
-    this.scores = [];
+    /** @type {Scores} */
+    this.scores = new Map();
     /** @type {Map<WebSocket, Player>} */
     this.registeredPlayers = new Map();
     this.countdown = 10;  // 10 seconds
 
     /** 
      * @type {{
-     *  scores: Score[],
+     *  scores: Scores,
      *  currentIndex: number,
      *  questions: string[],
      *  answers: string[],
@@ -89,8 +91,8 @@ class Server {
     const player = this.registeredPlayers.get(ws);
     if (player) {
       this.registeredPlayers.delete(ws);
-      this.scores = this.scores.filter(score => score.player !== player);
-      this.sendToAll({ type: 'scores', payload: this.scores });
+      this.scores.delete(player);
+      this.sendScores();
     }
     console.log('Client disconnected');
   }
@@ -139,13 +141,21 @@ class Server {
     if (this.game.state == 'PLAYING' && this.game.gameStatus == 'QUESTION') {
       if (!this.game.hasAnswered.get(player)) {
         if ((this.game.currentIndex >= 0) && (this.game.currentIndex < this.game.answers.length) && this.checkAnswer(message.payload.content.message, this.game.answers[this.game.currentIndex])) {
-          const score = this.scores.find(score => score.player === player);
-          if (score) {
-            score.score++;
-            this.sendToAll({ type: 'scores', payload: this.scores });
+          const score = this.scores.get(player);
+          if (score !== undefined) {
+            // find the number of players who have answered correctly
+            let numCorrect = 0;
+            this.game.hasAnswered.forEach((value) => {
+              if (value) {
+                numCorrect++;
+              }
+            });
+            const pointsGained = pointsArray[numCorrect];
+            this.scores.set(player, score + pointsGained);
+            this.sendScores();
+            this.sendToAll({ type: 'correctAnswer', payload: {player: player, points: pointsGained} });
+            this.game.hasAnswered.set(player, true);
           }
-          this.sendToAll({ type: 'correctAnswer', payload: player });
-          this.game.hasAnswered.set(player, true);
         }
       }
       if (!this.game.hasAnswered.get(player)) {
@@ -177,9 +187,9 @@ class Server {
 
     if (message.type === 'registerPlayer') {
       const player = message.payload;
-      this.scores.push({ player: player, score: 0 });
+      this.scores.set(player, 0);
       this.registeredPlayers.set(ws, player);
-      this.sendToAll({ type: 'scores', payload: this.scores });
+      this.sendScores();
     } else if (message.type === 'playerMessage') {
       const player = this.registeredPlayers.get(ws);
       if (player) {
@@ -188,6 +198,13 @@ class Server {
     } else if (message.type === 'askStartGame') {
       this.startGame();
     }
+  }
+
+  /**
+   * Sends the current scores to all connected clients.
+   */
+  sendScores() {
+    this.sendToAll({ type: 'scores', payload: Object.fromEntries(this.scores) });
   }
 
   /**

@@ -2,17 +2,18 @@
 
 import Chat from './chat';
 import styles from './page.module.css';
-import Scores from './scores';
+import Scoreboard from './scoreboard';
 import Clock from './clock';
 import DialogBox from './dialogueBox';
 import { useEffect, useRef, useState } from 'react';
-import { Message, StudioQuizEvent, Score, Question, DateMilliseconds, Answer, State, GameStatus } from '@/shared/types';
+import { Message, StudioQuizEvent, Question, DateMilliseconds, Answer, State, GameStatus, Scores, Player } from '@/shared/types';
 
 
 export default function Play() {
     const [pseudo, setPseudo] = useState<string>('');
     const [messages, setMessages] = useState<Message[]>([]);
-    const [scores, setScores] = useState<Score[]>([]);
+    const [scores, setScores] = useState<Scores>(new Map());
+    const [hasAnswered, setHasAnswered] = useState<Map<Player, boolean>>(new Map());
     const ws = useRef<WebSocket | null>(null);
     const [question, setQuestion] = useState<Question | null>(null);
     const [answer, setAnswer] = useState<Answer | null>(null);
@@ -46,7 +47,7 @@ export default function Play() {
                     setMessages(prevMessages => [...prevMessages, message.payload]);
                     break;
                 case 'scores':
-                    setScores(message.payload);
+                    setScores(new Map(Object.entries(message.payload)));
                     break;
                 case 'startGame':
                     setMessages(prevMessages => [...prevMessages, { type: 'startGame' }]);
@@ -54,6 +55,7 @@ export default function Play() {
                     setGameStatus("WAIT");
                     break;
                 case 'startQuestion':
+                    setHasAnswered(new Map());
                     setQuestion(message.payload.question);
                     setQuestionStartDate(Date.now());
                     setQuestionEndDate(message.payload.end);
@@ -62,6 +64,7 @@ export default function Play() {
                     break;
                 case 'correctAnswer':
                     setMessages(prevMessages => [...prevMessages, message]);
+                    setHasAnswered(prevHasAnswered => new Map([...prevHasAnswered, [message.payload.player, true]]));
                     break;
                 case 'endQuestion':
                     setMessages(prevMessages => [...prevMessages, message]);
@@ -108,7 +111,7 @@ export default function Play() {
             {sentence && <div style={{ position: "absolute", right: "1rem", top: "2rem", zIndex: 3 }}><DialogBox sentence={sentence} /></div>}
             <div className={styles.column} style={{ backgroundColor: "hsl(285.77deg 96.04% 19.8%)", display: 'grid', justifyItems: "center" }}>
                 <div style={{ position: "relative", left: "40px", zIndex: 0 }}><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWlHhJXvhgtIYxbJRcBM2u9fpe5X1M9ZCDBg&s"></img></div>
-                <Scores scores={scores} />
+                <Scoreboard scores={scores} hasAnswered={hasAnswered} />
             </div>
             <div className={styles.column}>
                 <Chat ws={ws} pseudo={pseudo} messages={messages} />
