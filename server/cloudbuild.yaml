@@ -3,7 +3,7 @@ steps:
     args:
       - build
       - >-
-        $_AR_HOSTNAME/$PROJECT_ID/compute-engine-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+        $_AR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
       - '--builder=gcr.io/buildpacks/builder:v1'
       - '--network=cloudbuild'
     id: Buildpack
@@ -12,7 +12,7 @@ steps:
     args:
       - push
       - >-
-        $_AR_HOSTNAME/$PROJECT_ID/compute-engine-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+        $_AR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
     id: Push
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     args:
@@ -20,16 +20,15 @@ steps:
       - instance-templates
       - create
       - $_INSTANCE_TEMPLATE_NAME
-      - --image=$_AR_HOSTNAME/$PROJECT_ID/compute-engine-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
-      - --source-instance-template=$_EXISTING_INSTANCE_TEMPLATE_NAME
+      - --image=$_AR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+      - --source-instance-template=$_INSTANCE_TEMPLATE_NAME
       - --labels=managed-by=gcp-cloud-build-deploy-instance-template,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
-      - --region=$_DEPLOY_REGION
       - --quiet
     id: Deploy
     entrypoint: gcloud
 images:
   - >-
-    $_AR_HOSTNAME/$PROJECT_ID/compute-engine-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+    $_AR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
 options:
   substitutionOption: ALLOW_LOOSE
   logging: CLOUD_LOGGING_ONLY
@@ -38,6 +37,7 @@ substitutions:
   _DEPLOY_REGION: europe-west9
   _TRIGGER_ID: e352a58d-c039-437a-bcb1-a1cb2361097b
   _AR_HOSTNAME: europe-west9-docker.pkg.dev
+  _INSTANCE_TEMPLATE_NAME: instance-template-20241115-144045
 tags:
   - gcp-cloud-build-deploy-compute-engine
   - gcp-cloud-build-deploy-compute-engine-managed
