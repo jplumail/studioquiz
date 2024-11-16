@@ -28,7 +28,7 @@ export default function Play() {
     useEffect(() => {
         const isProduction = process.env.NODE_ENV === 'production';
         const wsUrl = isProduction
-            ? 'wss://34.163.41.60:8080'
+            ? 'ws://34.163.41.60:8080'
             : 'ws://localhost:8080';
 
         ws.current = new WebSocket(wsUrl);
