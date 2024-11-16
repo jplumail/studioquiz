@@ -20,7 +20,7 @@ steps:
       - compute 
       - instances 
       - create-with-container 
-      - instance-studioquiz-server-$COMMIT_SHA 
+      - instance-studioquiz-server-$SHORT_SHA 
       - '--project=$PROJECT_ID'
       - '--zone=europe-west9-c'
       - '--machine-type=e2-micro'
