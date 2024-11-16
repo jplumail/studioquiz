@@ -15,6 +15,37 @@ steps:
       - >-
         $_AR_HOSTNAME/$PROJECT_ID/compute-engine-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
     id: Push
+  - name: gcr.io/cloud-builders/gcloud
+    args:
+      - compute 
+      - instances 
+      - create-with-container 
+      - >-
+        instance-studioquiz-server-$COMMIT_SHA 
+      - >-
+        '--project=$PROJECT_ID'
+      - '--zone=europe-west9-c'
+      - '--machine-type=e2-micro'
+      - >-
+        '--network-interface=address=$_IP_ADDRESS,network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet=default'
+      - '--maintenance-policy=MIGRATE'
+      - '--provisioning-model=STANDARD'
+      - >-
+        '--service-account=$_SERVICE_ACCOUNT'
+      - '--scopes=https://www.googleapis.com/auth/devstorage.read_only,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring.write,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/trace.append'
+      - '--tags=studioquiz-server,http-server,https-server,lb-health-check'
+      - '--image=projects/cos-cloud/global/images/cos-stable-117-18613-75-26'
+      - '--boot-disk-size=10GB'
+      - '--boot-disk-type=pd-balanced'
+      - >-
+        '--boot-disk-device-name=studioquiz-server-$COMMIT_SHA'
+      - '--container-image=$_AR_HOSTNAME/$PROJECT_ID/compute-engine-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+      - '--container-restart-policy=always'
+      - '--no-shielded-secure-boot'
+      - '--shielded-vtpm'
+      - '--shielded-integrity-monitoring'
+      - '--labels=goog-ec-src=vm_add-gcloud,container-vm=cos-stable-117-18613-75-26'
+    id: Deploy
 images:
   - >-
     $_AR_HOSTNAME/$PROJECT_ID/compute-engine-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
@@ -22,11 +53,14 @@ options:
   substitutionOption: ALLOW_LOOSE
   logging: CLOUD_LOGGING_ONLY
 substitutions:
+  _PROJECT_ID: studioquiz
   _SERVICE_NAME: studioquiz-server
   _DEPLOY_REGION: europe-west9
   _TRIGGER_ID: e352a58d-c039-437a-bcb1-a1cb2361097b
   _AR_HOSTNAME: europe-west9-docker.pkg.dev
   _INSTANCE_TEMPLATE_NAME: instance-template-20241115-144045
+  _IP_ADDRESS: '34.163.41.60'
+  _SERVICE_ACCOUNT: 577380683277-compute@developer.gserviceaccount.com
 tags:
   - gcp-cloud-build-deploy-compute-engine
   - gcp-cloud-build-deploy-compute-engine-managed
