@@ -15,18 +15,6 @@ steps:
       - >-
         $_AR_HOSTNAME/$PROJECT_ID/compute-engine-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
     id: Push
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-    args:
-      - compute
-      - instance-templates
-      - create
-      - $_INSTANCE_TEMPLATE_NAME
-      - --image=$_AR_HOSTNAME/$PROJECT_ID/compute-engine-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
-      - --source-instance-template=$_INSTANCE_TEMPLATE_NAME
-      - --labels=managed-by=gcp-cloud-build-deploy-instance-template,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
-      - --quiet
-    id: Deploy
-    entrypoint: gcloud
 images:
   - >-
     $_AR_HOSTNAME/$PROJECT_ID/compute-engine-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
