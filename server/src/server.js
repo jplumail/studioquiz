@@ -1,12 +1,25 @@
 // @ts-check
 /**
- * @import { StudioQuizEvent, Scores, Player, PlayerMessageEvent, State, GameStatus } from '../../shared/types';
+ * @import { Scores, Player, Score } from '../../shared/declarations';
+ * @import { ServerToClientEvents, ClientToServerEvents, InterServerEvents, SocketData } from '../../shared/declarations';
  */
 
-import { WebSocketServer, WebSocket } from 'ws';
+/**
+ * @readonly
+ * @enum {string}
+ */
+var State = {
+  LOBBY: "LOBBY",
+  FINISHED: "FINISHED",
+  WAITING: "WAITING",
+  QUESTION: "QUESTION",
+}
+
+import { Server as SocketIOServer, Socket as SocketIOSocket } from 'socket.io';
 import http from 'http';
 
 const port = process.env.PORT || 8080;
+const production = process.env.NODE_ENV === 'production';
 
 // Create an HTTP server
 const httpServer = http.createServer((req, res) => {
@@ -32,16 +45,29 @@ const placeholderAnswers = [
 
 const pointsArray = [4, 3, 3, 2, 1, 1, 1, 1];
 
+/**
+ * @typedef {SocketIOServer<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>} SocketServer
+ * @typedef {SocketIOSocket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>} Socket
+ */
 
 class Server {
   /**
    * @param {http.Server} httpServer
    */
   constructor(httpServer) {
-    this.server = new WebSocketServer({ server: httpServer });
+
+    var origin = production ? "https://example.com" : "http://localhost:3000";
+    /** @type {SocketServer} */
+    this.io = new SocketIOServer(httpServer, {
+      cors: {
+        origin: origin,
+        methods: ["GET", "POST"]
+      }
+    
+    });
     /** @type {Scores} */
     this.scores = new Map();
-    /** @type {Map<WebSocket, Player>} */
+    /** @type {Map<Socket, Player>} */
     this.registeredPlayers = new Map();
     this.countdown = 10;  // 10 seconds
 
@@ -53,7 +79,6 @@ class Server {
      *  answers: string[],
      *  hasAnswered: Map<Player, boolean>,
      *  state: State,
-     *  gameStatus: GameStatus
      * }}
     */
     this.game = {
@@ -62,35 +87,34 @@ class Server {
       questions: placeholderQuestions,
       answers: placeholderAnswers,
       hasAnswered: new Map(),
-      state: 'WAITING',
-      gameStatus: 'WAIT'
+      state: State.LOBBY,
     };
 
-    this.server.on('connection', (ws) => this.registerClient(ws));
+    this.io.on('connection', (socket) => {
+        console.log('Client connected');
+        socket.emit('scores', Object.fromEntries(this.scores));
+        socket.on('registerPlayer', (player) => {
+          // @ts-ignore
+          this.scores.set(player, 0)
+          this.registeredPlayers.set(socket, player);
+          this.sendScores();
+        });
+
+        socket.on('playerMessage', (player, string) => this.handlePlayerMessage(player, string));
+        socket.on('askStartGame', () => this.startGame());
+        socket.on('disconnect', () => this.unregisterClient(socket));
+    });
   }
 
-  /**
-   * Registers a new client.
-   * @param {WebSocket} ws
-   */
-  registerClient(ws) {
-    console.log('Client connected');
-
-    ws.send(JSON.stringify({ type: 'welcome', payload: 'Welcome to the server!' }));
-    ws.send(JSON.stringify({ type: 'scores', payload: this.scores }));
-
-    ws.on('message', (data) => this.handleMessage(ws, data));
-    ws.on('close', () => this.unregisterClient(ws));
-  }
 
   /**
    * Unregisters a client.
-   * @param {WebSocket} ws
+   * @param {Socket} socket
    */
-  unregisterClient(ws) {
-    const player = this.registeredPlayers.get(ws);
+  unregisterClient(socket) {
+    const player = this.registeredPlayers.get(socket);
     if (player) {
-      this.registeredPlayers.delete(ws);
+      this.registeredPlayers.delete(socket);
       this.scores.delete(player);
       this.sendScores();
     }
@@ -98,7 +122,7 @@ class Server {
   }
 
   startGame() {
-    this.sendToAll({ type: 'startGame' });
+    this.io.emit('startGame');
     this.game.currentIndex = -1;
     this.game.state = 'PLAYING';
     this.nextQuestion();
@@ -112,8 +136,10 @@ class Server {
         return;
       }
       this.game.hasAnswered.forEach((_, key) => this.game.hasAnswered.set(key, false));
-      this.sendToAll({ type: 'startQuestion', payload: { question: this.game.questions[this.game.currentIndex], end: Date.now() + this.countdown * 1000, index: this.game.currentIndex + 1 } });
-      this.game.gameStatus = 'QUESTION';
+      console.log("Sending question: this.game.currentIndex", this.game.currentIndex);
+      // @ts-ignore
+      this.io.emit('startQuestion', this.game.questions[this.game.currentIndex], this.game.currentIndex + 1, Date.now() + this.countdown * 1000);
+      this.game.state = 'QUESTION';
       setTimeout(() => this.endQuestion(), this.countdown * 1000);
 
     }
@@ -121,26 +147,27 @@ class Server {
 
   endQuestion() {
     if (this.game.currentIndex !== null) {
-      this.game.gameStatus = 'WAIT';
-      this.sendToAll({ type: 'endQuestion', payload: this.game.answers[this.game.currentIndex] });
+      this.game.state = 'WAITO';
+      // @ts-ignore
+      this.io.emit('endQuestion', this.game.answers[this.game.currentIndex]);
       setTimeout(() => this.nextQuestion(), 5000);
     }
   }
 
   endGame() {
-    this.sendToAll({ type: 'endGame' });
+    this.io.emit('endGame');
     this.game.state = 'FINISHED';
   }
 
   /**
    * Handles incoming messages from players.
    * @param {Player} player
-   * @param {PlayerMessageEvent} message
+   * @param {string} message
    */
   handlePlayerMessage(player, message) {
-    if (this.game.state == 'PLAYING' && this.game.gameStatus == 'QUESTION') {
+    if (this.game.state == State.QUESTION) {
       if (!this.game.hasAnswered.get(player)) {
-        if ((this.game.currentIndex >= 0) && (this.game.currentIndex < this.game.answers.length) && this.checkAnswer(message.payload.content.message, this.game.answers[this.game.currentIndex])) {
+        if ((this.game.currentIndex >= 0) && (this.game.currentIndex < this.game.answers.length) && this.checkAnswer(message, this.game.answers[this.game.currentIndex])) {
           const score = this.scores.get(player);
           if (score !== undefined) {
             // find the number of players who have answered correctly
@@ -151,18 +178,19 @@ class Server {
               }
             });
             const pointsGained = pointsArray[numCorrect];
+            // @ts-ignore
             this.scores.set(player, score + pointsGained);
             this.sendScores();
-            this.sendToAll({ type: 'correctAnswer', payload: {player: player, points: pointsGained} });
+            this.io.emit('correctAnswer', player, pointsGained);
             this.game.hasAnswered.set(player, true);
           }
         }
       }
       if (!this.game.hasAnswered.get(player)) {
-        this.sendToAll(message);
+        this.io.emit('playerMessage', player, message);
       }
     } else {
-      this.sendToAll(message);
+      this.io.emit('playerMessage', player, message);
     }
   }
 
@@ -176,49 +204,12 @@ class Server {
   }
 
   /**
-   * Handles incoming messages from clients.
-   * @param {WebSocket} ws
-   * @param {import('ws').RawData} data
-   */
-  handleMessage(ws, data) {
-    /** @type {StudioQuizEvent} */
-    const message = JSON.parse(data.toString());
-    console.log("message received: ", message)
-
-    if (message.type === 'registerPlayer') {
-      const player = message.payload;
-      this.scores.set(player, 0);
-      this.registeredPlayers.set(ws, player);
-      this.sendScores();
-    } else if (message.type === 'playerMessage') {
-      const player = this.registeredPlayers.get(ws);
-      if (player) {
-        this.handlePlayerMessage(player, message);
-      }
-    } else if (message.type === 'askStartGame') {
-      this.startGame();
-    }
-  }
-
-  /**
    * Sends the current scores to all connected clients.
    */
   sendScores() {
-    this.sendToAll({ type: 'scores', payload: Object.fromEntries(this.scores) });
+    this.io.emit('scores', Object.fromEntries(this.scores));
   }
 
-  /**
-   * Sends a message to all connected clients.
-   * @param {StudioQuizEvent} message
-   */
-  sendToAll(message) {
-    console.log('Sending to all:', message);
-    this.registeredPlayers.forEach((_, client) => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(message));
-      }
-    });
-  }
 }
 
 const server = new Server(httpServer);

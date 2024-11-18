@@ -1,32 +1,16 @@
 import React, { useEffect, useState, useRef } from 'react';
 import styles from './page.module.css';
-import { type StudioQuizEvent, type Message, type PlayerMessage, type Player, type Answer } from '@/shared/types';
+import { type Player, type Answer, type State } from '@/shared/declarations';
+import {ChatMessage} from './page';
 
+
+const player: Player = "haha" as Player;
 
 interface ChatProps {
-    ws: { current: WebSocket | null };
-    pseudo: string;
-    messages: Message[];
+    sendMessage: (content: string) => void;
+    messages: ChatMessage[];
 }
-export default function Chat({ ws, pseudo, messages }: ChatProps) {
-
-    const sendMessage = (content: string) => {
-        if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-            let event: StudioQuizEvent | null = null;
-            if (content.startsWith('/')) {
-                if (content === '/start') {
-                    event = { type: 'askStartGame' };
-                }
-            } else {
-                event = { type: 'playerMessage', payload: { type: "player", content: { player: pseudo, message: content } } };
-            }
-            if (event) {
-                console.log("send", event);
-                ws.current.send(JSON.stringify(event));
-            }
-        }
-    };
-
+export default function Chat({ sendMessage, messages }: ChatProps) {
     return (
         <div className={styles.chatContainer}>
             <ChatFlow messages={messages} />
@@ -35,8 +19,8 @@ export default function Chat({ ws, pseudo, messages }: ChatProps) {
     );
 }
 
-type ChatFlowProps = {
-    messages: Message[];
+interface ChatFlowProps {
+    messages: ChatMessage[];
 };
 function ChatFlow({ messages }: ChatFlowProps) {
     return (
@@ -45,15 +29,15 @@ function ChatFlow({ messages }: ChatFlowProps) {
                 (m, index) => {
                     switch (m.type) {
                         case "player":
-                            return <PlayerMessageComponent key={index} message={m} />;
+                            return <PlayerMessageComponent key={index} player={m.player} message={m.message} />;
                         case "startGame":
                             return <StartGameMessageComponent key={index} />;
                         case "correctAnswer":
-                            return <CorrectAnswerComponent key={index} player={m.payload.player} points={m.payload.points} />;
+                            return <CorrectAnswerComponent key={index} player={m.player} points={m.gainedPoints} />;
                         case "startQuestion":
-                            return <StartQuestionComponent key={index} questionIndex={m.payload.index} />;
+                            return <StartQuestionComponent key={index} questionIndex={m.index} />;
                         case "endQuestion":
-                            return <EndQuestionComponent key={index} answer={m.payload} />
+                            return <EndQuestionComponent key={index} answer={m.answer} />
                     }
                 }
             )}
@@ -61,11 +45,11 @@ function ChatFlow({ messages }: ChatFlowProps) {
     );
 }
 
-function PlayerMessageComponent({ message }: { message: PlayerMessage }) {
+function PlayerMessageComponent({ player, message }: { player: Player, message: string }) {
     const pseudoColor = "#0090ff";
     return (
         <div>
-            <span style={{ color: pseudoColor }}>{message.content.player}</span><span style={{ color: pseudoColor }}>{" > "}</span><span>{message.content.message}</span>
+            <span style={{ color: pseudoColor }}>{player}</span><span style={{ color: pseudoColor }}>{" > "}</span><span>{message}</span>
         </div>
     );
 }

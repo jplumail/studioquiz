@@ -6,119 +6,155 @@ import Scoreboard from './scoreboard';
 import Clock from './clock';
 import DialogBox from './dialogueBox';
 import { useEffect, useRef, useState } from 'react';
-import { Message, StudioQuizEvent, Question, DateMilliseconds, Answer, State, GameStatus, Scores, Player } from '@/shared/types';
+import { State } from '@/shared/types';
+import { Question, DateMilliseconds, Answer, Scores, Player } from '@/shared/declarations';
+import { ServerToClientEvents, ClientToServerEvents } from '@/shared/declarations';
+import { io, Socket } from 'socket.io-client';
+
+
+type ChatMessage = {
+    type: "player";
+    player: Player;
+    message: string;
+} | {
+    type: "startGame";
+} | {
+    type: "startQuestion";
+    question: Question;
+    index: number;
+} | {
+    type: "endQuestion";
+    answer: Answer;
+} | {
+    type: "correctAnswer";
+    player: Player;
+    gainedPoints: number;
+}
+
+export type { ChatMessage };
 
 export default function Play() {
-    const [pseudo, setPseudo] = useState<string>('');
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [pseudo, setPseudo] = useState<Player | null>(null);
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [scores, setScores] = useState<Scores>(new Map());
     const [hasAnswered, setHasAnswered] = useState<Map<Player, boolean>>(new Map());
-    const ws = useRef<WebSocket | null>(null);
+    const socket = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
     const [question, setQuestion] = useState<Question | null>(null);
     const [answer, setAnswer] = useState<Answer | null>(null);
     const [questionStartDate, setQuestionStartDate] = useState<DateMilliseconds | null>(null);
     const [questionEndDate, setQuestionEndDate] = useState<DateMilliseconds | null>(null);
     const correctAnswerAudio = useRef<HTMLAudioElement | null>(null);
 
-    const [state, setState] = useState<State>("WAITING");
-    const [gameStatus, setGameStatus] = useState<GameStatus | null>(null);
+    const [state, setState] = useState<State>(State.LOBBY);
 
     const [sentence, setSentence] = useState<string | null>(null);
 
     useEffect(() => {
         const isProduction = process.env.NODE_ENV === 'production';
-        const wsUrl = isProduction
-            ? 'ws://34.163.41.60:8080'
-            : 'ws://localhost:8080';
+        const socketUrl = isProduction
+            ? 'http://34.163.41.60:8080'
+            : 'http://localhost:8080';
 
-        ws.current = new WebSocket(wsUrl);
+        socket.current = io(socketUrl);
 
-        const randomPseudo = Math.random().toString(36).substring(7);
+        const randomPseudo = Math.random().toString(36).substring(7) as Player;
         setPseudo(randomPseudo);
 
-        ws.current.onopen = () => {
-            ws.current?.send(JSON.stringify({ type: 'registerPlayer', payload: randomPseudo }));
-        };
+        socket.current.emit('registerPlayer', randomPseudo);
 
-        ws.current.onmessage = (event) => {
-            const message: StudioQuizEvent = JSON.parse(event.data);
-            switch (message.type) {
-                case 'playerMessage':
-                    setMessages(prevMessages => [...prevMessages, message.payload]);
-                    break;
-                case 'scores':
-                    setScores(new Map(Object.entries(message.payload)));
-                    break;
-                case 'startGame':
-                    setMessages(prevMessages => [...prevMessages, { type: 'startGame' }]);
-                    setState("PLAYING");
-                    setGameStatus("WAIT");
-                    break;
-                case 'startQuestion':
-                    setHasAnswered(new Map());
-                    setQuestion(message.payload.question);
-                    setQuestionStartDate(Date.now());
-                    setQuestionEndDate(message.payload.end);
-                    setGameStatus("QUESTION");
-                    setMessages(prevMessages => [...prevMessages, message]);
-                    break;
-                case 'correctAnswer':
-                    setMessages(prevMessages => [...prevMessages, message]);
-                    setHasAnswered(prevHasAnswered => new Map([...prevHasAnswered, [message.payload.player, true]]));
-                    if (correctAnswerAudio.current) {
-                        correctAnswerAudio.current.play();
-                    }
-                    break;
-                case 'endQuestion':
-                    setMessages(prevMessages => [...prevMessages, message]);
-                    setGameStatus("WAIT");
-                    setAnswer(message.payload);
-                    break;
-                case 'endGame':
-                    setState("FINISHED");
-                    break;
-                default:
-                    console.warn(`Unhandled message type: ${message.type}`);
+        socket.current.on('playerMessage', (player, message) => {
+            setMessages(prevMessages => [...prevMessages, {type: "player", message: message, player: player}]);
+        });
+
+        socket.current.on('scores', (scores) => {
+            setScores(new Map(Object.entries(scores)) as Scores);
+        });
+
+        socket.current.on('startGame', () => {
+            setState(State.LOBBY);
+        });
+
+        socket.current.on('startQuestion', (question, index, end) => {
+            setHasAnswered(new Map());
+            setQuestion(question);
+            setQuestionStartDate(Date.now() as DateMilliseconds);
+            setQuestionEndDate(end);
+            setState(State.QUESTION);
+            setMessages(prevMessages => [...prevMessages, {type: "startQuestion", question: question, index: index}]);
+        });
+
+        socket.current.on('correctAnswer', (player, points) => {
+            setMessages(prevMessages => [...prevMessages, {type: "correctAnswer", player: player, gainedPoints: points}]);
+            setHasAnswered(prevHasAnswered => new Map([...prevHasAnswered, [player, true]]));
+            if (correctAnswerAudio.current) {
+                correctAnswerAudio.current.play();
             }
-        };
+        });
 
-        ws.current.onclose = () => {
-            console.log('Disconnected from WebSocket server');
-        };
+        socket.current.on('endQuestion', (answer) => {
+            setMessages(prevMessages => [...prevMessages, {type: "endQuestion", answer: answer}]);
+            setState(State.WAITING);
+            setAnswer(answer);
+        });
+
+        socket.current.on('endGame', () => {
+            setState(State.FINISHED);
+        });
 
         return () => {
-            if (ws.current) {
-                ws.current.close();
+            if (socket.current) {
+                socket.current.disconnect();
             }
         };
     }, []);
 
     useEffect(() => {
-        if (state == "WAITING") {
-            setSentence('En attente de joueurs...');
-        } else if (state == "PLAYING") {
-            if (gameStatus == "QUESTION") {
+        switch (state) {
+            case State.LOBBY:
+                setSentence('On attend encore quelques joueurs...');
+                break;
+            case State.QUESTION:
                 setSentence(question);
-            }
-            if (gameStatus == "WAIT" && answer) {
-                setSentence(`Terminé ! La bonne réponse était ${answer}`);
-            }
-        } else if (state == "FINISHED") {
-            setSentence('La partie est terminée ! Merci d\'avoir joué');
+                break;
+            case State.WAITING:
+                if (answer) {
+                    setSentence(`Terminé ! La bonne réponse était ${answer}`);
+                }
+                break;
+            case State.FINISHED:
+                setSentence('La partie est terminée ! Merci d\'avoir joué');
+                break;
+            default:
+                setSentence(null);
+                break;
         }
-    }, [gameStatus, state]);
+    }, [state]);
+
+    const sendMessage = (content: string) => {
+        if (socket.current && socket.current.connected) {
+            if (content.startsWith('/')) {
+                if (content === '/start') {
+                    socket.current.emit('askStartGame');
+                }
+            } else {
+                if (pseudo) {
+                    socket.current.emit('playerMessage', pseudo, content);
+                }
+            }
+        }
+    };
 
     return (
         <div className={styles.container}>
             <audio ref={correctAnswerAudio} src="/correct-answer.mp3" />
-            {(gameStatus == "QUESTION") && (questionStartDate && questionEndDate) && <div style={{ position: "absolute", margin: "0.5rem", zIndex: 1 }}><Clock startDate={questionStartDate} endDate={questionEndDate} /></div>}
+            {(state == State.QUESTION) && (questionStartDate && questionEndDate) && <div style={{ position: "absolute", margin: "0.5rem", zIndex: 1 }}><Clock startDate={questionStartDate} endDate={questionEndDate} /></div>}
             {sentence && <div style={{ position: "absolute", right: "1rem", top: "2rem", zIndex: 3 }}><DialogBox sentence={sentence} /></div>}
             <div className={styles.column} style={{ backgroundColor: "hsl(285.77deg 96.04% 19.8%)", display: 'grid', justifyItems: "center" }}>
                 <div style={{ position: "relative", left: "40px", zIndex: 0 }}><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWlHhJXvhgtIYxbJRcBM2u9fpe5X1M9ZCDBg&s"></img></div>
                 <Scoreboard scores={scores} hasAnswered={hasAnswered} />
             </div>
             <div className={styles.column}>
-                <Chat ws={ws} pseudo={pseudo} messages={messages} />
+                <Chat sendMessage={sendMessage} messages={messages}/>
             </div>
         </div>
     )

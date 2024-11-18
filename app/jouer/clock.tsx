@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './clock.css';
-import { DateMilliseconds } from '@/shared/types';
+import { DateMilliseconds } from '@/shared/declarations';
 
 export default function Clock({ startDate, endDate }: { startDate: DateMilliseconds, endDate: DateMilliseconds }) {
     const [currentDate, setCurrentDate] = useState(Date.now());
