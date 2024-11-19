@@ -67,7 +67,7 @@ class GameServer {
    */
   constructor(httpServer) {
 
-    var origin = production ? "memcached-17786.c253.us-central1-1.gce.redns.redis-cloud.com:17786" : "http://localhost:3000";
+    var origin = production ? "https://studioquiz.web.app" : "http://localhost:3000";
     /** @type {SocketServer} */
     this.io = new SocketIOServer(httpServer, {
       adapter: createAdapter(pubClient, subClient),

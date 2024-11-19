@@ -52,7 +52,7 @@ export default function Play() {
     useEffect(() => {
         const isProduction = process.env.NODE_ENV === 'production';
         const socketUrl = isProduction
-            ? 'http://34.163.41.60:8080'
+            ? 'https://studioquiz-server-577380683277.europe-west9.run.app'
             : 'http://localhost:8080';
 
         socket.current = io(socketUrl);
