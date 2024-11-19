@@ -1,7 +1,7 @@
-import { Scores, Player } from '@/shared/declarations';
+import { Player, Score } from '@/shared/declarations';
 import styles from './page.module.css';
 
-export default function Scoreboard({ scores, hasAnswered }: {scores: Scores, hasAnswered: Map<Player, boolean>}) {
+export default function Scoreboard({ scores, hasAnswered }: {scores: Map<Player, Score>, hasAnswered: Map<Player, boolean>}) {
     return (
         <div style={{
             width: '100%',
