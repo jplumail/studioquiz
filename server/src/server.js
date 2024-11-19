@@ -13,7 +13,7 @@ const port = process.env.PORT || 8080;
 const production = process.env.NODE_ENV === 'production';
 
 
-const pubClient = createClient({ url: production ? "redis://memcached-17786.c253.us-central1-1.gce.redns.redis-cloud.com:17786" : "redis://localhost:6379" });
+const pubClient = createClient({ url: production ? "redis://10.71.118.235:6379" : "redis://localhost:6379" });
 const subClient = pubClient.duplicate();
 
 await Promise.all([
