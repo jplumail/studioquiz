@@ -9,16 +9,17 @@ import http from 'http';
 import { createAdapter } from "@socket.io/redis-adapter";
 import { createClient } from "redis";
 
-const pubClient = createClient({ url: "redis://localhost:6379" });
+const port = process.env.PORT || 8080;
+const production = process.env.NODE_ENV === 'production';
+
+
+const pubClient = createClient({ url: production ? "redis://memcached-17786.c253.us-central1-1.gce.redns.redis-cloud.com:17786" : "redis://localhost:6379" });
 const subClient = pubClient.duplicate();
 
 await Promise.all([
   pubClient.connect(),
   subClient.connect()
 ]);
-
-const port = process.env.PORT || 8080;
-const production = process.env.NODE_ENV === 'production';
 
 // Create an HTTP server
 
@@ -66,7 +67,7 @@ class GameServer {
    */
   constructor(httpServer) {
 
-    var origin = production ? "https://example.com" : "http://localhost:3000";
+    var origin = production ? "memcached-17786.c253.us-central1-1.gce.redns.redis-cloud.com:17786" : "http://localhost:3000";
     /** @type {SocketServer} */
     this.io = new SocketIOServer(httpServer, {
       adapter: createAdapter(pubClient, subClient),
