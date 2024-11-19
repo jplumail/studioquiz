@@ -7,7 +7,7 @@ import Clock from './clock';
 import DialogBox from './dialogueBox';
 import { useEffect, useRef, useState } from 'react';
 import { State } from '@/shared/types';
-import { Question, DateMilliseconds, Answer, Scores, Player } from '@/shared/declarations';
+import { Question, DateMilliseconds, Answer, Player, Score } from '@/shared/declarations';
 import { ServerToClientEvents, ClientToServerEvents } from '@/shared/declarations';
 import { io, Socket } from 'socket.io-client';
 
@@ -36,7 +36,7 @@ export type { ChatMessage };
 export default function Play() {
     const [pseudo, setPseudo] = useState<Player | null>(null);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
-    const [scores, setScores] = useState<Scores>(new Map());
+    const [scores, setScores] = useState<Map<Player, Score>>(new Map());
     const [hasAnswered, setHasAnswered] = useState<Map<Player, boolean>>(new Map());
     const socket = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
     const [question, setQuestion] = useState<Question | null>(null);
@@ -55,7 +55,9 @@ export default function Play() {
             ? 'https://studioquiz-server-577380683277.europe-west9.run.app'
             : 'http://localhost:8080';
 
-        socket.current = io(socketUrl);
+        socket.current = io(socketUrl, {
+            transports: ['websocket'],
+        });
 
         const randomPseudo = Math.random().toString(36).substring(7) as Player;
         setPseudo(randomPseudo);
@@ -67,7 +69,7 @@ export default function Play() {
         });
 
         socket.current.on('scores', (scores) => {
-            setScores(new Map(Object.entries(scores)) as Scores);
+            setScores(new Map(Object.entries(scores)) as Map<Player, Score>);
         });
 
         socket.current.on('startGame', () => {
