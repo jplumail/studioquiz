@@ -16,18 +16,19 @@ const production = process.env.NODE_ENV === 'production';
 const pubClient = createClient({ url: production ? "redis://10.71.118.235:6379" : "redis://localhost:6379" });
 const subClient = pubClient.duplicate();
 
+console.log('Connecting to Redis...');
 await Promise.all([
   pubClient.connect(),
   subClient.connect()
 ]);
 
 // Create an HTTP server
-
 const httpServer = http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
   res.end('OK');
 });
 
+console.log('Starting HTTP server...');
 httpServer.listen(port, () => {
   console.log(`HTTP server is running on port ${port}`);
 });
@@ -68,9 +69,10 @@ class GameServer {
   constructor(httpServer) {
 
     var origin = production ? "https://studioquiz.web.app" : "http://localhost:3000";
+    console.log("Creating Socket.IO server...");
     /** @type {SocketServer} */
     this.io = new SocketIOServer(httpServer, {
-      adapter: createAdapter(pubClient, subClient),
+      adapter: createAdapter(pubClient, subClient, {}),
       cors: {
         origin: origin,
         methods: ["GET", "POST"]
@@ -88,11 +90,14 @@ class GameServer {
       registeredPlayers: {},
     }
 
+    console.log('Listening for events...');
+    console.log('Listening for game state');
     this.io.on('gameState', (newState) => {
       console.log('Received game state');
       this.game = newState;
     })
 
+    console.log('Listening for connection');
     this.io.on('connection', (socket) => {
       socket.id
         console.log('Client connected');
@@ -233,5 +238,5 @@ class GameServer {
 
 }
 
-
+console.log("Starting server...");
 const server = new GameServer(httpServer);
