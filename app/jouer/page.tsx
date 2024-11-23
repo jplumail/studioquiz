@@ -51,9 +51,14 @@ export default function Play() {
 
     useEffect(() => {
         const isProduction = process.env.NODE_ENV === 'production';
-        const socketUrl = isProduction
-            ? 'https://studioquiz-server-577380683277.europe-west9.run.app'
-            : 'http://localhost:8080';
+        let socketUrl: string;
+        if (isProduction) {
+            socketUrl = 'https://studioquiz-server-577380683277.europe-west9.run.app';
+        } else {
+            const port = Math.floor(Math.random() * 2) + 8081;
+            socketUrl = `http://localhost:${port}`;
+        }
+        console.log(`Connecting to ${socketUrl}`);
 
         socket.current = io(socketUrl, {
             transports: ['websocket'],

@@ -6,21 +6,28 @@
 
 import { Server as SocketIOServer } from 'socket.io';
 import http from 'http';
-import { createAdapter } from "@socket.io/redis-adapter";
-import { createClient } from "redis";
+import { PubSub } from "@google-cloud/pubsub";
+import { createAdapter } from "@socket.io/gcp-pubsub-adapter";
 
-const port = process.env.PORT || 8080;
 const production = process.env.NODE_ENV === 'production';
 
+const pubsub = new PubSub({
+  projectId: "studioquiz",
+  emulatorMode: !production,
+});
 
-const pubClient = createClient({ url: production ? "redis://10.71.118.235:6379" : "redis://localhost:6379" });
-const subClient = pubClient.duplicate();
+const topic = pubsub.topic("chat");
 
-console.log('Connecting to Redis...');
-await Promise.all([
-  pubClient.connect(),
-  subClient.connect()
-]);
+// test if the topic doesnt exist, create it
+topic.exists().then(([exists]) => {
+  if (!exists) {
+    topic.create().then(() => {
+      console.log("Topic created");
+    });
+  }
+});
+
+const port = process.env.PORT || 8080;
 
 // Create an HTTP server
 const httpServer = http.createServer((req, res) => {
@@ -71,13 +78,15 @@ class GameServer {
     var origin = production ? "https://studioquiz.web.app" : "http://localhost:3000";
     console.log("Creating Socket.IO server...");
     /** @type {SocketServer} */
-    this.io = new SocketIOServer(httpServer, {
-      adapter: createAdapter(pubClient, subClient, {}),
+    const io = new SocketIOServer(httpServer, {
+      adapter: createAdapter(topic),
       cors: {
         origin: origin,
         methods: ["GET", "POST"]
       }
     });
+
+    this.namespace = io.of("/");
 
     /** @type {GameState} */
     this.game = {
@@ -89,17 +98,20 @@ class GameServer {
       status: "LOBBY",
       registeredPlayers: {},
     }
+  }
+
+  async init() {
+    await this.namespace.adapter.init();
 
     console.log('Listening for events...');
     console.log('Listening for game state');
-    this.io.on('gameState', (newState) => {
+    this.namespace.on('gameState', (newState) => {
       console.log('Received game state');
       this.game = newState;
     })
 
     console.log('Listening for connection');
-    this.io.on('connection', (socket) => {
-      socket.id
+    this.namespace.on('connection', (socket) => {
         console.log('Client connected');
         socket.emit('scores', this.game.scores);
         socket.on('registerPlayer', (player) => {
@@ -117,7 +129,7 @@ class GameServer {
   }
 
   updateGame() {
-    this.io.serverSideEmit('gameState', this.game);
+    this.namespace.serverSideEmit('gameState', this.game);
   }
 
 
@@ -137,7 +149,7 @@ class GameServer {
   }
 
   startGame() {
-    this.io.emit('startGame');
+    this.namespace.emit('startGame');
     this.game.currentIndex = -1;
     this.game.status = 'WAITING';
     this.nextQuestion();
@@ -160,7 +172,7 @@ class GameServer {
       /** @type {DateMilliseconds} */
       // @ts-ignore
       const endTime = getCurrentTime() + countdown
-      this.io.emit('startQuestion', this.game.questions[this.game.currentIndex], this.game.currentIndex + 1, endTime);
+      this.namespace.emit('startQuestion', this.game.questions[this.game.currentIndex], this.game.currentIndex + 1, endTime);
       this.game.status = 'QUESTION';
       this.updateGame();
       setTimeout(() => this.endQuestion(), countdown);
@@ -171,14 +183,14 @@ class GameServer {
     if (this.game.currentIndex !== null) {
       this.game.status = 'WAITING';
       
-      this.io.emit('endQuestion', this.game.answers[this.game.currentIndex]);
+      this.namespace.emit('endQuestion', this.game.answers[this.game.currentIndex]);
       this.updateGame();
       setTimeout(() => this.nextQuestion(), 5000);
     }
   }
 
   endGame() {
-    this.io.emit('endGame');
+    this.namespace.emit('endGame');
     this.game.status = 'FINISHED';
     this.updateGame();
   }
@@ -203,7 +215,7 @@ class GameServer {
             const newScore = score + pointsArray[numCorrect];
             this.game.scores[player] = newScore;
             this.sendScores();
-            this.io.emit('correctAnswer', player, pointsArray[numCorrect]);
+            this.namespace.emit('correctAnswer', player, pointsArray[numCorrect]);
             
             this.game.hasAnswered[player] = true;
           }
@@ -211,10 +223,10 @@ class GameServer {
       }
       
       if (!this.game.hasAnswered[player]) {
-        this.io.emit('playerMessage', player, message);
+        this.namespace.emit('playerMessage', player, message);
       }
     } else {
-      this.io.emit('playerMessage', player, message);
+      this.namespace.emit('playerMessage', player, message);
     }
     this.updateGame();
   }
@@ -233,10 +245,12 @@ class GameServer {
    */
   sendScores() {
     
-    this.io.emit('scores', this.game.scores);
+    this.namespace.emit('scores', this.game.scores);
   }
 
 }
 
-console.log("Starting server...");
 const server = new GameServer(httpServer);
+console.log("Starting server...");
+await server.init();
+console.log("Server started");

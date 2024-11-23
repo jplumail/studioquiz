@@ -4,19 +4,23 @@
   "main": "src/server.js",
   "scripts": {
     "dev": "nodemon src/server.js",
+    "dev-cluster": "concurrently \"PORT=8081 nodemon src/server.js\" \"PORT=8082 nodemon src/server.js\"",
     "start": "node src/server.js"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "nodemon": "^2.0.22"
+    "concurrently": "^9.1.0",
+    "nodemon": "^3.1.7"
   },
   "type": "module",
   "dependencies": {
-    "@socket.io/redis-adapter": "^8.3.0",
+    "@socket.io/gcp-pubsub-adapter": "^0.1.0",
     "cors": "^2.8.5",
-    "redis": "^4.7.0",
     "socket.io": "^4.8.1"
+  },
+  "engines": {
+    "node": ">22.7.0"
   }
 }
