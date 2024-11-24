@@ -79,7 +79,7 @@ class GameServer {
     console.log("Creating Socket.IO server...");
     /** @type {SocketServer} */
     const io = new SocketIOServer(httpServer, {
-      adapter: createAdapter(topic),
+      adapter: createAdapter(topic, {subscriptionOptions: {messageRetentionDuration: {seconds: 600}}}),
       cors: {
         origin: origin,
         methods: ["GET", "POST"]
