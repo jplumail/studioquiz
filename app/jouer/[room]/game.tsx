@@ -7,8 +7,8 @@ import Clock from './clock';
 import DialogBox from './dialogueBox';
 import { useEffect, useRef, useState } from 'react';
 import { State } from '@/shared/types';
-import { Question, DateMilliseconds, Answer, Player, Score } from '@/shared/declarations';
-import { ServerToClientEvents, ClientToServerEvents } from '@/shared/declarations';
+import { Question, DateMilliseconds, Answer, Player, Score } from '@/shared/types';
+import { ServerToClientEvents, ClientToServerEvents } from '@/shared/types';
 import { io, Socket } from 'socket.io-client';
 import { ChatMessage } from './types';
 
@@ -35,8 +35,7 @@ export default function Game({ room }: {room: string}) {
         if (isProduction) {
             socketUrl = 'https://studioquiz-server-577380683277.europe-west9.run.app';
         } else {
-            const port = Math.floor(Math.random() * 2) + 8081;
-            socketUrl = `http://localhost:${port}`;
+            socketUrl = `http://localhost:3000`;
         }
         console.log(`Connecting to ${socketUrl}`);
 

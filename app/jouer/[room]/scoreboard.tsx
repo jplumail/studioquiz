@@ -1,4 +1,4 @@
-import { Player, Score } from '@/shared/declarations';
+import { Player, Score } from '@/shared/types';
 import styles from './page.module.css';
 
 export default function Scoreboard({ scores, hasAnswered }: {scores: Map<Player, Score>, hasAnswered: Map<Player, boolean>}) {

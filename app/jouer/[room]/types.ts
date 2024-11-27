@@ -1,4 +1,4 @@
-import { Question, Answer, Player } from '@/shared/declarations';
+import { Question, Answer, Player } from '@/shared/types';
 
 
 type ChatMessage = {

@@ -1,13 +1,9 @@
-// @ts-check
-/**
- * @import { Player, GameState, Question, Answer, DateMilliseconds, Score } from '../../shared/declarations';
- * @import { Socket, SocketServer } from '../../shared/declarations';
- */
-
-import { Server as SocketIOServer } from 'socket.io';
-import http from 'http';
+import { Server as SocketIOServer, Socket as SocketIOSocket } from 'socket.io';
+import { createServer, Server } from "node:http";
 import { PubSub } from "@google-cloud/pubsub";
 import { createAdapter } from "@socket.io/gcp-pubsub-adapter";
+import next from "next";
+import { Player, GameState, Question, Answer, DateMilliseconds, Score, SocketId, ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData } from './shared/types';
 
 const production = process.env.NODE_ENV === 'production';
 
@@ -27,59 +23,47 @@ topic.exists().then(([exists]) => {
   }
 });
 
-const port = process.env.PORT || 8080;
+const dev = process.env.NODE_ENV !== "production";
+const hostname = "localhost";
+const port = parseInt(process.env.PORT || '3000');
+// when using middleware `hostname` and `port` must be provided below
+const app = next({ dev, hostname, port });
+const handler = app.getRequestHandler();
+
+await app.prepare();
 
 // Create an HTTP server
-const httpServer = http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('OK');
-});
+const httpServer: Server = createServer(handler);
 
 console.log('Starting HTTP server...');
 httpServer.listen(port, () => {
   console.log(`HTTP server is running on port ${port}`);
 });
 
-/**
- * @type {Question[]}
- */
-// @ts-ignore
-const placeholderQuestions = ["What is the capital of France?", "What is the capital of Germany?","What is the capital of Italy?",]
+const placeholderQuestions = ["What is the capital of France?", "What is the capital of Germany?", "What is the capital of Italy?"] as Question[];
+const placeholderAnswers = ["Paris", "Berlin", "Rome"] as Answer[];
 
-/**
- * @type {Answer[]}
- */
-// @ts-ignore
-const placeholderAnswers = ["Paris","Berlin","Rome"]
+const pointsArray: number[] = [4, 3, 3, 2, 1, 1, 1, 1];
+const countdown = 10 * 1000 as DateMilliseconds;  // 10 seconds
 
-const pointsArray = [4, 3, 3, 2, 1, 1, 1, 1];
-
-/**
- * @type {DateMilliseconds}
- */
-// @ts-ignore
-const countdown = 10 * 1000;  // 10 seconds
-
-/**
- * @returns {DateMilliseconds}
- */
 function getCurrentTime() {
-  // @ts-ignore
-  return Date.now();
+  return Date.now() as DateMilliseconds;
 }
 
-
 class GameServer {
-  /**
-   * @param {http.Server} httpServer
-   */
-  constructor(httpServer) {
+  namespace;
+  game: GameState;
 
-    var origin = production ? "https://studioquiz.web.app" : "http://localhost:3000";
+  constructor(httpServer: Server) {
+    const origin = production ? "https://studioquiz.web.app" : "http://localhost:3000";
     console.log("Creating Socket.IO server...");
-    /** @type {SocketServer} */
-    const io = new SocketIOServer(httpServer, {
-      adapter: createAdapter(topic, {subscriptionOptions: {messageRetentionDuration: {seconds: 600}}}),
+    const io = new SocketIOServer<
+      ClientToServerEvents,
+      ServerToClientEvents,
+      InterServerEvents,
+      SocketData
+    >(httpServer, {
+      adapter: createAdapter(topic, { subscriptionOptions: { messageRetentionDuration: { seconds: 600 } } }),
       cors: {
         origin: origin,
         methods: ["GET", "POST"]
@@ -88,7 +72,6 @@ class GameServer {
 
     this.namespace = io.of("/");
 
-    /** @type {GameState} */
     this.game = {
       scores: {},
       currentIndex: 0,
@@ -105,26 +88,25 @@ class GameServer {
 
     console.log('Listening for events...');
     console.log('Listening for game state');
-    this.namespace.on('gameState', (newState) => {
+    this.namespace.on('gameState', (newState: GameState) => {
       console.log('Received game state');
       this.game = newState;
-    })
+    });
 
     console.log('Listening for connection');
-    this.namespace.on('connection', (socket) => {
-        console.log('Client connected');
-        socket.emit('scores', this.game.scores);
-        socket.on('registerPlayer', (player) => {
-          // @ts-ignore
-          this.game.scores[player] = 0;
-          this.game.registeredPlayers[socket.id] = player;
-          this.updateGame();
-          this.sendScores();
-        });
+    this.namespace.on('connection', (socket: SocketIOSocket) => {
+      console.log('Client connected');
+      socket.emit('scores', this.game.scores);
+      socket.on('registerPlayer', (player: Player) => {
+        this.game.scores[player] = 0 as Score;
+        this.game.registeredPlayers[socket.id as SocketId] = player;
+        this.updateGame();
+        this.sendScores();
+      });
 
-        socket.on('playerMessage', (player, string) => this.handlePlayerMessage(player, string));
-        socket.on('askStartGame', () => this.startGame());
-        socket.on('disconnect', () => this.unregisterClient(socket));
+      socket.on('playerMessage', (player: Player, message: string) => this.handlePlayerMessage(player, message));
+      socket.on('askStartGame', () => this.startGame());
+      socket.on('disconnect', () => this.unregisterClient(socket));
     });
   }
 
@@ -132,18 +114,13 @@ class GameServer {
     this.namespace.serverSideEmit('gameState', this.game);
   }
 
-
-  /**
-   * Unregisters a client.
-   * @param {Socket} socket
-   */
-  unregisterClient(socket) {
-    const player = this.game.registeredPlayers[socket.id];
+  unregisterClient(socket: SocketIOSocket) {
+    const player = this.game.registeredPlayers[socket.id as SocketId];
     if (player) {
-      delete this.game.registeredPlayers[socket.id];
+      delete this.game.registeredPlayers[socket.id as SocketId];
       delete this.game.scores[player];
       this.sendScores();
-      this.updateGame()
+      this.updateGame();
     }
     console.log('Client disconnected');
   }
@@ -167,11 +144,9 @@ class GameServer {
       this.game.hasAnswered = Object.keys(this.game.registeredPlayers).reduce((acc, player) => {
         acc[player] = false;
         return acc;
-      }, {});
+      }, {} as Record<string, boolean>);
       
-      /** @type {DateMilliseconds} */
-      // @ts-ignore
-      const endTime = getCurrentTime() + countdown
+      const endTime = getCurrentTime() + countdown as DateMilliseconds;
       this.namespace.emit('startQuestion', this.game.questions[this.game.currentIndex], this.game.currentIndex + 1, endTime);
       this.game.status = 'QUESTION';
       this.updateGame();
@@ -195,33 +170,21 @@ class GameServer {
     this.updateGame();
   }
 
-  /**
-   * Handles incoming messages from players.
-   * @param {Player} player
-   * @param {string} message
-   */
-  handlePlayerMessage(player, message) {
+  handlePlayerMessage(player: Player, message: string) {
     if (this.game.status == 'QUESTION') {
-      
       if (!this.game.hasAnswered[player]) {
         if ((this.game.currentIndex >= 0) && (this.game.currentIndex < this.game.answers.length) && this.checkAnswer(message, this.game.answers[this.game.currentIndex])) {
-          
           const score = this.game.scores[player];
           if (score !== undefined) {
-            // find the number of players who have answered correctly
             const numCorrect = Object.values(this.game.hasAnswered).filter(value => value).length;
-            /** @type {Score} */
-            // @ts-ignore
-            const newScore = score + pointsArray[numCorrect];
+            const newScore = score + pointsArray[numCorrect] as Score;
             this.game.scores[player] = newScore;
             this.sendScores();
             this.namespace.emit('correctAnswer', player, pointsArray[numCorrect]);
-            
             this.game.hasAnswered[player] = true;
           }
         }
       }
-      
       if (!this.game.hasAnswered[player]) {
         this.namespace.emit('playerMessage', player, message);
       }
@@ -231,23 +194,13 @@ class GameServer {
     this.updateGame();
   }
 
-  /**
-   * Checks if attempt is correct
-   * @param {string} attempt
-   * @param {string} answer
-   */
-  checkAnswer(attempt, answer) {
-    return attempt.toLowerCase() === answer.toLowerCase()
+  checkAnswer(attempt: string, answer: string): boolean {
+    return attempt.toLowerCase() === answer.toLowerCase();
   }
 
-  /**
-   * Sends the current scores to all connected clients.
-   */
   sendScores() {
-    
     this.namespace.emit('scores', this.game.scores);
   }
-
 }
 
 const server = new GameServer(httpServer);
