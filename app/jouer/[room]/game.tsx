@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import Chat from './chat';
 import styles from './page.module.css';
@@ -10,30 +10,10 @@ import { State } from '@/shared/types';
 import { Question, DateMilliseconds, Answer, Player, Score } from '@/shared/declarations';
 import { ServerToClientEvents, ClientToServerEvents } from '@/shared/declarations';
 import { io, Socket } from 'socket.io-client';
+import { ChatMessage } from './types';
 
 
-type ChatMessage = {
-    type: "player";
-    player: Player;
-    message: string;
-} | {
-    type: "startGame";
-} | {
-    type: "startQuestion";
-    question: Question;
-    index: number;
-} | {
-    type: "endQuestion";
-    answer: Answer;
-} | {
-    type: "correctAnswer";
-    player: Player;
-    gainedPoints: number;
-}
-
-export type { ChatMessage };
-
-export default function Play() {
+export default function Game({ room }: {room: string}) {
     const [pseudo, setPseudo] = useState<Player | null>(null);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [scores, setScores] = useState<Map<Player, Score>>(new Map());
@@ -152,17 +132,19 @@ export default function Play() {
     };
 
     return (
-        <div className={styles.container}>
-            <audio ref={correctAnswerAudio} src="/correct-answer.mp3" />
-            {(state == State.QUESTION) && (questionStartDate && questionEndDate) && <div style={{ position: "absolute", margin: "0.5rem", zIndex: 1 }}><Clock startDate={questionStartDate} endDate={questionEndDate} /></div>}
-            {sentence && <div style={{ position: "absolute", right: "1rem", top: "2rem", zIndex: 3 }}><DialogBox sentence={sentence} /></div>}
-            <div className={styles.column} style={{ backgroundColor: "hsl(285.77deg 96.04% 19.8%)", display: 'grid', justifyItems: "center" }}>
-                <div style={{ position: "relative", left: "40px", zIndex: 0 }}><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWlHhJXvhgtIYxbJRcBM2u9fpe5X1M9ZCDBg&s"></img></div>
-                <Scoreboard scores={scores} hasAnswered={hasAnswered} />
+        <>
+            <div className={styles.container}>
+                <audio ref={correctAnswerAudio} src="/correct-answer.mp3" />
+                {(state == State.QUESTION) && (questionStartDate && questionEndDate) && <div style={{ position: "absolute", margin: "0.5rem", zIndex: 1 }}><Clock startDate={questionStartDate} endDate={questionEndDate} /></div>}
+                {sentence && <div style={{ position: "absolute", right: "1rem", top: "2rem", zIndex: 3 }}><DialogBox sentence={sentence} /></div>}
+                <div className={styles.column} style={{ backgroundColor: "hsl(285.77deg 96.04% 19.8%)", display: 'grid', justifyItems: "center" }}>
+                    <div style={{ position: "relative", left: "40px", zIndex: 0 }}><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWlHhJXvhgtIYxbJRcBM2u9fpe5X1M9ZCDBg&s"></img></div>
+                    <Scoreboard scores={scores} hasAnswered={hasAnswered} />
+                </div>
+                <div className={styles.column}>
+                    <Chat sendMessage={sendMessage} messages={messages}/>
+                </div>
             </div>
-            <div className={styles.column}>
-                <Chat sendMessage={sendMessage} messages={messages}/>
-            </div>
-        </div>
+        </>
     )
 }

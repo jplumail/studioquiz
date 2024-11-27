@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import styles from './page.module.css';
 import { type Player, type Answer, type State } from '@/shared/declarations';
-import {ChatMessage} from './page';
+import {ChatMessage} from './types';
 
 
 const player: Player = "haha" as Player;
