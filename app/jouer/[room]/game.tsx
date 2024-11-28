@@ -30,18 +30,11 @@ export default function Game({ room }: {room: string}) {
     const [sentence, setSentence] = useState<string | null>(null);
 
     useEffect(() => {
-        const isProduction = process.env.NODE_ENV === 'production';
-        let socketUrl: string;
-        if (isProduction) {
-            socketUrl = 'https://studioquiz-server-577380683277.europe-west9.run.app';
-        } else {
-            socketUrl = `http://localhost:3000`;
-        }
-        console.log(`Connecting to ${socketUrl}`);
-
-        socket.current = io(socketUrl, {
+        console.log(`Connecting to socket.io server...`);
+        socket.current = io({
             transports: ['websocket'],
         });
+        console.log(`Connected to socket.io server`);
 
         const randomPseudo = Math.random().toString(36).substring(7) as Player;
         setPseudo(randomPseudo);
