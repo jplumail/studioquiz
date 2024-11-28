@@ -13,8 +13,7 @@ import { io, Socket } from 'socket.io-client';
 import { ChatMessage } from './types';
 
 
-export default function Game({ room }: {room: RoomId}) {
-    const [pseudo, setPseudo] = useState<Player | null>(null);
+export default function Game({ room, pseudo }: {room: RoomId, pseudo: Player}) {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [scores, setScores] = useState<Map<Player, Score>>(new Map());
     const [hasAnswered, setHasAnswered] = useState<Map<Player, boolean>>(new Map());
@@ -36,12 +35,10 @@ export default function Game({ room }: {room: RoomId}) {
         });
         console.log(`Connected to socket.io server`);
 
-        const randomPseudo = Math.random().toString(36).substring(7) as Player;
-        setPseudo(randomPseudo);
+        console.log(`Joining room ${room}`);
+        socket.current.timeout(1000).emit('joinRoom', room, (error) => {error ? console.error('Error joining room', error) : console.log('Joined room')});
 
-        socket.current.timeout(1000).emit('joinRoom', room, (error) => {error && console.error('Error joining room', error)});
-
-        socket.current.emit('registerPlayer', randomPseudo);
+        socket.current.emit('registerPlayer', pseudo);
 
         socket.current.on('playerMessage', (player, message) => {
             setMessages(prevMessages => [...prevMessages, {type: "player", message: message, player: player}]);

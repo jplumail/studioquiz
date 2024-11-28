@@ -18,5 +18,5 @@ npm run dev
 - [x] go to next question when timer is over
 - [x] move from redis to google pub/sub
 - [x] implement server-side rooms
-- [ ] choose pseudo
-- [ ] create use from client, share with link
+- [x] choose pseudo
+- [x] create room from client, share with link, join the room
