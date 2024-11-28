@@ -3,7 +3,7 @@ import { createServer, Server } from "node:http";
 import { PubSub } from "@google-cloud/pubsub";
 import { createAdapter } from "@socket.io/gcp-pubsub-adapter";
 import next from "next";
-import { Player, GameState, Question, Answer, DateMilliseconds, Score, SocketId, ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData } from './shared/types';
+import { Player, GameState, Question, Answer, DateMilliseconds, Score, SocketId, ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData, State } from './shared/types';
 
 const production = process.env.NODE_ENV === 'production';
 
@@ -78,7 +78,7 @@ class GameServer {
       questions: placeholderQuestions,
       answers: placeholderAnswers,
       hasAnswered: {},
-      status: "LOBBY",
+      status: State.LOBBY,
       registeredPlayers: {},
     }
   }
@@ -128,7 +128,7 @@ class GameServer {
   startGame() {
     this.namespace.emit('startGame');
     this.game.currentIndex = -1;
-    this.game.status = 'WAITING';
+    this.game.status = State.WAITING;
     this.nextQuestion();
     this.updateGame();
   }
@@ -148,7 +148,7 @@ class GameServer {
       
       const endTime = getCurrentTime() + countdown as DateMilliseconds;
       this.namespace.emit('startQuestion', this.game.questions[this.game.currentIndex], this.game.currentIndex + 1, endTime);
-      this.game.status = 'QUESTION';
+      this.game.status = State.QUESTION;
       this.updateGame();
       setTimeout(() => this.endQuestion(), countdown);
     }
@@ -156,7 +156,7 @@ class GameServer {
 
   endQuestion() {
     if (this.game.currentIndex !== null) {
-      this.game.status = 'WAITING';
+      this.game.status = State.WAITING;
       
       this.namespace.emit('endQuestion', this.game.answers[this.game.currentIndex]);
       this.updateGame();
@@ -166,12 +166,12 @@ class GameServer {
 
   endGame() {
     this.namespace.emit('endGame');
-    this.game.status = 'FINISHED';
+    this.game.status = State.FINISHED;
     this.updateGame();
   }
 
   handlePlayerMessage(player: Player, message: string) {
-    if (this.game.status == 'QUESTION') {
+    if (this.game.status == State.QUESTION) {
       if (!this.game.hasAnswered[player]) {
         if ((this.game.currentIndex >= 0) && (this.game.currentIndex < this.game.answers.length) && this.checkAnswer(message, this.game.answers[this.game.currentIndex])) {
           const score = this.game.scores[player];

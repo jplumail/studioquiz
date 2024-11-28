@@ -41,15 +41,15 @@ interface GameState {
     questions: Question[],
     answers: Answer[],
     hasAnswered: Record<Player, boolean>,
-    status: "LOBBY" | "FINISHED" | "WAITING" | "QUESTION",
+    status: State,
     registeredPlayers: Record<SocketId, Player>,
 }
 
 export enum State {
-    LOBBY = "LOBBY",
-    FINISHED = "FINISHED",
-    WAITING = "WAITING",
-    QUESTION = "QUESTION",
+    LOBBY,
+    FINISHED,
+    WAITING,
+    QUESTION,
 }
 
 // Exports
@@ -67,4 +67,5 @@ export type {
     SocketServer,
     Socket,
     SocketId,
+    RoomId,
 };
