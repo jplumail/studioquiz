@@ -1,5 +1,6 @@
 import type { Tagged } from "type-fest";
 import type { Server as SocketIOServer, Socket as SocketIOSocket } from 'socket.io';
+import { Room } from "socket.io-adapter";
 
 // Custom types
 type Player = Tagged<string, 'Player'>;
@@ -7,6 +8,7 @@ type Question = Tagged<string, 'Question'>;
 type Answer = Tagged<string, 'Answer'>;
 type DateMilliseconds = Tagged<number, 'DateMilliseconds'>; // in milliseconds
 type Score = Tagged<number, 'Score'>;
+type RoomId = Tagged<Room, 'RoomId'>;
 
 // Socket.IO events
 interface ServerToClientEvents {
@@ -20,16 +22,17 @@ interface ServerToClientEvents {
 }
 
 interface ClientToServerEvents {
+    joinRoom: (room: RoomId, callback: () => void) => void;
     registerPlayer: (player: Player) => void;
     askStartGame: () => void;
     playerMessage: (player: Player, message: string) => void;
 }
 
 interface InterServerEvents {
-    gameState: (state: GameState) => void;
+    gameState: (room: RoomId, state: GameState) => void;
 }
 
-interface SocketData {}
+interface SocketData { }
 
 type SocketServer = SocketIOServer<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>
 type Socket = SocketIOSocket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;

@@ -1,9 +1,9 @@
 import { Server as SocketIOServer, Socket as SocketIOSocket } from 'socket.io';
-import { createServer, Server } from "node:http";
+import { createServer, Server as NodeServer } from "node:http";
 import { PubSub } from "@google-cloud/pubsub";
 import { createAdapter } from "@socket.io/gcp-pubsub-adapter";
 import next from "next";
-import { Player, GameState, Question, Answer, DateMilliseconds, Score, SocketId, ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData, State } from './shared/types';
+import { Player, GameState, Question, Answer, DateMilliseconds, Score, SocketId, ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData, State, RoomId } from './shared/types';
 
 const production = process.env.NODE_ENV === 'production';
 
@@ -33,7 +33,7 @@ const handler = app.getRequestHandler();
 await app.prepare();
 
 // Create an HTTP server
-const httpServer: Server = createServer(handler);
+const httpServer = createServer(handler);
 
 console.log('Starting HTTP server...');
 httpServer.listen(port, () => {
@@ -51,27 +51,14 @@ function getCurrentTime() {
 }
 
 class GameServer {
-  namespace;
   game: GameState;
+  roomEmit: (event: keyof ServerToClientEvents, ...args: Parameters<ServerToClientEvents[keyof ServerToClientEvents]>) => void;
+  serverSideRoomEmit: (state: GameState) => boolean;
 
-  constructor(httpServer: Server) {
-    const origin = production ? "https://studioquiz.web.app" : "http://localhost:3000";
-    console.log("Creating Socket.IO server...");
-    const io = new SocketIOServer<
-      ClientToServerEvents,
-      ServerToClientEvents,
-      InterServerEvents,
-      SocketData
-    >(httpServer, {
-      adapter: createAdapter(topic, { subscriptionOptions: { messageRetentionDuration: { seconds: 600 } } }),
-      cors: {
-        origin: origin,
-        methods: ["GET", "POST"]
-      }
-    });
-
-    this.namespace = io.of("/");
-
+  constructor(
+    roomEmit: (event: keyof ServerToClientEvents, ...args: Parameters<ServerToClientEvents[keyof ServerToClientEvents]>) => void,
+    serverSideRoomEmit: (state: GameState) => boolean
+  ) {
     this.game = {
       scores: {},
       currentIndex: 0,
@@ -81,37 +68,27 @@ class GameServer {
       status: State.LOBBY,
       registeredPlayers: {},
     }
+    this.roomEmit = roomEmit;
+    this.serverSideRoomEmit = serverSideRoomEmit;
   }
 
-  async init() {
-    await this.namespace.adapter.init();
-
-    console.log('Listening for events...');
-    console.log('Listening for game state');
-    this.namespace.on('gameState', (newState: GameState) => {
-      console.log('Received game state');
-      this.game = newState;
+  onConnection(socket: SocketIOSocket) {
+    console.log('Client connected');
+    this.roomEmit('scores', this.game.scores);
+    socket.on('registerPlayer', (player: Player) => {
+      this.game.scores[player] = 0 as Score;
+      this.game.registeredPlayers[socket.id as SocketId] = player;
+      this.updateGame();
+      this.sendScores();
     });
 
-    console.log('Listening for connection');
-    this.namespace.on('connection', (socket: SocketIOSocket) => {
-      console.log('Client connected');
-      socket.emit('scores', this.game.scores);
-      socket.on('registerPlayer', (player: Player) => {
-        this.game.scores[player] = 0 as Score;
-        this.game.registeredPlayers[socket.id as SocketId] = player;
-        this.updateGame();
-        this.sendScores();
-      });
-
-      socket.on('playerMessage', (player: Player, message: string) => this.handlePlayerMessage(player, message));
-      socket.on('askStartGame', () => this.startGame());
-      socket.on('disconnect', () => this.unregisterClient(socket));
-    });
+    socket.on('playerMessage', (player: Player, message: string) => this.handlePlayerMessage(player, message));
+    socket.on('askStartGame', () => this.startGame());
+    socket.on('disconnect', () => this.unregisterClient(socket));
   }
 
   updateGame() {
-    this.namespace.serverSideEmit('gameState', this.game);
+    this.serverSideRoomEmit(this.game);
   }
 
   unregisterClient(socket: SocketIOSocket) {
@@ -126,7 +103,7 @@ class GameServer {
   }
 
   startGame() {
-    this.namespace.emit('startGame');
+    this.roomEmit('startGame');
     this.game.currentIndex = -1;
     this.game.status = State.WAITING;
     this.nextQuestion();
@@ -145,9 +122,9 @@ class GameServer {
         acc[player] = false;
         return acc;
       }, {} as Record<string, boolean>);
-      
+
       const endTime = getCurrentTime() + countdown as DateMilliseconds;
-      this.namespace.emit('startQuestion', this.game.questions[this.game.currentIndex], this.game.currentIndex + 1, endTime);
+      this.roomEmit('startQuestion', this.game.questions[this.game.currentIndex], this.game.currentIndex + 1, endTime);
       this.game.status = State.QUESTION;
       this.updateGame();
       setTimeout(() => this.endQuestion(), countdown);
@@ -157,15 +134,15 @@ class GameServer {
   endQuestion() {
     if (this.game.currentIndex !== null) {
       this.game.status = State.WAITING;
-      
-      this.namespace.emit('endQuestion', this.game.answers[this.game.currentIndex]);
+
+      this.roomEmit('endQuestion', this.game.answers[this.game.currentIndex]);
       this.updateGame();
       setTimeout(() => this.nextQuestion(), 5000);
     }
   }
 
   endGame() {
-    this.namespace.emit('endGame');
+    this.roomEmit('endGame');
     this.game.status = State.FINISHED;
     this.updateGame();
   }
@@ -180,16 +157,16 @@ class GameServer {
             const newScore = score + pointsArray[numCorrect] as Score;
             this.game.scores[player] = newScore;
             this.sendScores();
-            this.namespace.emit('correctAnswer', player, pointsArray[numCorrect]);
+            this.roomEmit('correctAnswer', player, pointsArray[numCorrect]);
             this.game.hasAnswered[player] = true;
           }
         }
       }
       if (!this.game.hasAnswered[player]) {
-        this.namespace.emit('playerMessage', player, message);
+        this.roomEmit('playerMessage', player, message);
       }
     } else {
-      this.namespace.emit('playerMessage', player, message);
+      this.roomEmit('playerMessage', player, message);
     }
     this.updateGame();
   }
@@ -199,11 +176,73 @@ class GameServer {
   }
 
   sendScores() {
-    this.namespace.emit('scores', this.game.scores);
+    this.roomEmit('scores', this.game.scores);
   }
 }
 
-const server = new GameServer(httpServer);
+class Server {
+  gameServers: Record<RoomId, GameServer>;
+  io: SocketIOServer<
+    ClientToServerEvents,
+    ServerToClientEvents,
+    InterServerEvents,
+    SocketData
+  >;
+
+  constructor(httpServer: NodeServer) {
+    this.gameServers = {};
+
+    console.log("Creating Socket.IO server...");
+    this.io = new SocketIOServer<
+      ClientToServerEvents,
+      ServerToClientEvents,
+      InterServerEvents,
+      SocketData
+    >(httpServer, {
+      adapter: createAdapter(topic, { subscriptionOptions: { messageRetentionDuration: { seconds: 600 } } }),
+    });
+  }
+
+  joinRoom(room: RoomId, socket: SocketIOSocket) {
+    socket.join(room);
+    if (!this.roomExists(room)) {
+      this.createRoom(room);
+    }
+    console.log("private adapter broadcast", this.io.of("/").to("haha").adapter.broadcast);
+    this.gameServers[room].onConnection(socket)
+  }
+
+  roomExists(room: RoomId) {
+    return this.gameServers[room] !== undefined;
+  }
+
+  createRoom(room: RoomId) {
+    const gs = new GameServer(
+      (ev, ...args) => this.io.of("/").to(room).emit(ev, ...args),
+      (state: GameState) => this.io.of("/").serverSideEmit("gameState", room, state)
+    );
+    this.gameServers[room] = gs;
+  }
+
+  async init() {
+    await this.io.of('/').adapter.init();
+
+    this.io.of("/").on('connection', (socket: SocketIOSocket) => {
+      socket.on('joinRoom', (room: RoomId, callback) => {
+        this.joinRoom(room, socket)
+        callback();
+      });
+    })
+    this.io.of("/").on('gameState', (room: RoomId, newState: GameState) => {
+      if (!this.gameServers[room]) {
+        this.createRoom(room);
+      }
+      this.gameServers[room].game = newState;
+    });
+  }
+}
+
+const server = new Server(httpServer);
 console.log("Starting server...");
 await server.init();
 console.log("Server started");

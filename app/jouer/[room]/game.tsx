@@ -6,14 +6,14 @@ import Scoreboard from './scoreboard';
 import Clock from './clock';
 import DialogBox from './dialogueBox';
 import { useEffect, useRef, useState } from 'react';
-import { State } from '@/shared/types';
+import { RoomId, State } from '@/shared/types';
 import { Question, DateMilliseconds, Answer, Player, Score } from '@/shared/types';
 import { ServerToClientEvents, ClientToServerEvents } from '@/shared/types';
 import { io, Socket } from 'socket.io-client';
 import { ChatMessage } from './types';
 
 
-export default function Game({ room }: {room: string}) {
+export default function Game({ room }: {room: RoomId}) {
     const [pseudo, setPseudo] = useState<Player | null>(null);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [scores, setScores] = useState<Map<Player, Score>>(new Map());
@@ -38,6 +38,8 @@ export default function Game({ room }: {room: string}) {
 
         const randomPseudo = Math.random().toString(36).substring(7) as Player;
         setPseudo(randomPseudo);
+
+        socket.current.timeout(1000).emit('joinRoom', room, (error) => {error && console.error('Error joining room', error)});
 
         socket.current.emit('registerPlayer', randomPseudo);
 
