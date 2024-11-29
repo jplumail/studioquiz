@@ -1,7 +1,7 @@
-import { Player, Score } from '@/shared/types';
+import { types } from '@/types';
 import styles from './page.module.css';
 
-export default function Scoreboard({ scores, hasAnswered }: {scores: Map<Player, Score>, hasAnswered: Map<Player, boolean>}) {
+export default function Scoreboard({ scores, hasAnswered }: {scores: Map<types.Player, types.Score>, hasAnswered: Map<types.Player, boolean>}) {
     return (
         <div style={{
             width: '100%',

@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import styles from './page.module.css';
-import { type Player, type Answer, type State } from '@/shared/types';
-import {ChatMessage} from './types';
+import { types } from '@/types';
+import {ChatMessage} from '../../../types';
 
 
-const player: Player = "haha" as Player;
+const player: types.Player = "haha" as types.Player;
 
 interface ChatProps {
     sendMessage: (content: string) => void;
@@ -45,7 +45,7 @@ function ChatFlow({ messages }: ChatFlowProps) {
     );
 }
 
-function PlayerMessageComponent({ player, message }: { player: Player, message: string }) {
+function PlayerMessageComponent({ player, message }: { player: types.Player, message: string }) {
     const pseudoColor = "#0090ff";
     return (
         <div>
@@ -62,7 +62,7 @@ function StartGameMessageComponent() {
     );
 }
 
-function CorrectAnswerComponent({ player, points }: { player: Player, points: number }) {
+function CorrectAnswerComponent({ player, points }: { player: types.Player, points: number }) {
     return (
         <div>
             <span style={{ color: "yellow" }}>{player} trouve la bonne réponse ! +{points} points</span>
@@ -70,7 +70,7 @@ function CorrectAnswerComponent({ player, points }: { player: Player, points: nu
     );
 }
 
-function EndQuestionComponent({ answer }: { answer: Answer }) {
+function EndQuestionComponent({ answer }: { answer: types.Answer }) {
     return (
         <div>
             <span style={{ color: "yellow" }}>Question terminée !</span>

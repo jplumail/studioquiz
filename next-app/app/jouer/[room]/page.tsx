@@ -1,13 +1,13 @@
 "use client"
 
-import { RoomId, Player } from '@/shared/types';
+import { types } from '@/types';
 import Game from './game';
 
 
 import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 
-function PseudoModal({ pseudo, setPseudo, handleSubmit }: { pseudo: Player | null, setPseudo: (p: Player) => void, handleSubmit: () => void }) {
+function PseudoModal({ pseudo, setPseudo, handleSubmit }: { pseudo: types.Player | null, setPseudo: (p: types.Player) => void, handleSubmit: () => void }) {
   return (
     <>
       <div
@@ -34,7 +34,7 @@ function PseudoModal({ pseudo, setPseudo, handleSubmit }: { pseudo: Player | nul
           <input
             type="text"
             value={pseudo || ''}
-            onChange={(e) => setPseudo(e.target.value as Player)}
+            onChange={(e) => setPseudo(e.target.value as types.Player)}
             style={{
               width: '100%',
               padding: '10px',
@@ -64,7 +64,7 @@ function PseudoModal({ pseudo, setPseudo, handleSubmit }: { pseudo: Player | nul
 
 export default function Page() {
   const [isModalOpen, setIsModalOpen] = useState(true);
-  const [pseudo, setPseudo] = useState<Player | null>(null);
+  const [pseudo, setPseudo] = useState<types.Player | null>(null);
 
   function handleSubmit() {
     if (pseudo && pseudo.trim()) {
@@ -79,6 +79,6 @@ export default function Page() {
   const room = usePathname().split('/').pop();
   return (
     isModalOpen ? <PseudoModal pseudo={pseudo} setPseudo={setPseudo} handleSubmit={handleSubmit} />
-    : (pseudo && <Game room={room as RoomId} pseudo={pseudo} />)
+    : (pseudo && <Game room={room as types.RoomId} pseudo={pseudo} />)
   );
 }

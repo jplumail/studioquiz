@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import './clock.css';
-import { DateMilliseconds } from '@/shared/types';
+import { types } from '@/types';
 
-export default function Clock({ startDate, endDate }: { startDate: DateMilliseconds, endDate: DateMilliseconds }) {
+export default function Clock({ startDate, endDate }: { startDate: types.DateMilliseconds, endDate: types.DateMilliseconds }) {
     const [currentDate, setCurrentDate] = useState(Date.now());
     const refreshRate = 30;
 

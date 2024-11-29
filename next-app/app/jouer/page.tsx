@@ -1,9 +1,9 @@
 /* This page is used to create a room */
 'use client';
 
-import { Player, RoomId } from "@/shared/types";
+import { types } from "@/types";
 import { useState } from "react";
-import { hostname } from "@/constants"
+import { hostname } from "../../../shared/constants"
 
 const CopyLinkTextbox = ({ link }: { link: string }) => {
     const [copySuccess, setCopySuccess] = useState("");
@@ -48,7 +48,7 @@ const CopyLinkTextbox = ({ link }: { link: string }) => {
 };
 
 export default function Page() {
-    const [room, setRoom] = useState<RoomId | null>(null);
+    const [room, setRoom] = useState<types.RoomId | null>(null);
     const roomUrl = `/jouer/${room}`;
 
     function handleRoomCreation() {

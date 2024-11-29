@@ -6,25 +6,23 @@ import Scoreboard from './scoreboard';
 import Clock from './clock';
 import DialogBox from './dialogueBox';
 import { useEffect, useRef, useState } from 'react';
-import { RoomId, State } from '@/shared/types';
-import { Question, DateMilliseconds, Answer, Player, Score } from '@/shared/types';
-import { ServerToClientEvents, ClientToServerEvents } from '@/shared/types';
+import { types } from '@/types';
 import { io, Socket } from 'socket.io-client';
-import { ChatMessage } from './types';
+import { ChatMessage } from '../../../types';
 
 
-export default function Game({ room, pseudo }: {room: RoomId, pseudo: Player}) {
+export default function Game({ room, pseudo }: {room: types.RoomId, pseudo: types.Player}) {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
-    const [scores, setScores] = useState<Map<Player, Score>>(new Map());
-    const [hasAnswered, setHasAnswered] = useState<Map<Player, boolean>>(new Map());
-    const socket = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
-    const [question, setQuestion] = useState<Question | null>(null);
-    const [answer, setAnswer] = useState<Answer | null>(null);
-    const [questionStartDate, setQuestionStartDate] = useState<DateMilliseconds | null>(null);
-    const [questionEndDate, setQuestionEndDate] = useState<DateMilliseconds | null>(null);
+    const [scores, setScores] = useState<Map<types.Player, types.Score>>(new Map());
+    const [hasAnswered, setHasAnswered] = useState<Map<types.Player, boolean>>(new Map());
+    const socket = useRef<Socket<types.ServerToClientEvents, types.ClientToServerEvents> | null>(null);
+    const [question, setQuestion] = useState<types.Question | null>(null);
+    const [answer, setAnswer] = useState<types.Answer | null>(null);
+    const [questionStartDate, setQuestionStartDate] = useState<types.DateMilliseconds | null>(null);
+    const [questionEndDate, setQuestionEndDate] = useState<types.DateMilliseconds | null>(null);
     const correctAnswerAudio = useRef<HTMLAudioElement | null>(null);
 
-    const [state, setState] = useState<State>(State.LOBBY);
+    const [state, setState] = useState<types.State>(types.State.LOBBY);
 
     const [sentence, setSentence] = useState<string | null>(null);
 
@@ -45,19 +43,19 @@ export default function Game({ room, pseudo }: {room: RoomId, pseudo: Player}) {
         });
 
         socket.current.on('scores', (scores) => {
-            setScores(new Map(Object.entries(scores)) as Map<Player, Score>);
+            setScores(new Map(Object.entries(scores)) as Map<types.Player, types.Score>);
         });
 
         socket.current.on('startGame', () => {
-            setState(State.LOBBY);
+            setState(types.State.LOBBY);
         });
 
         socket.current.on('startQuestion', (question, index, end) => {
             setHasAnswered(new Map());
             setQuestion(question);
-            setQuestionStartDate(Date.now() as DateMilliseconds);
+            setQuestionStartDate(Date.now() as types.DateMilliseconds);
             setQuestionEndDate(end);
-            setState(State.QUESTION);
+            setState(types.State.QUESTION);
             setMessages(prevMessages => [...prevMessages, {type: "startQuestion", question: question, index: index}]);
         });
 
@@ -71,12 +69,12 @@ export default function Game({ room, pseudo }: {room: RoomId, pseudo: Player}) {
 
         socket.current.on('endQuestion', (answer) => {
             setMessages(prevMessages => [...prevMessages, {type: "endQuestion", answer: answer}]);
-            setState(State.WAITING);
+            setState(types.State.WAITING);
             setAnswer(answer);
         });
 
         socket.current.on('endGame', () => {
-            setState(State.FINISHED);
+            setState(types.State.FINISHED);
         });
 
         return () => {
@@ -88,18 +86,18 @@ export default function Game({ room, pseudo }: {room: RoomId, pseudo: Player}) {
 
     useEffect(() => {
         switch (state) {
-            case State.LOBBY:
+            case types.State.LOBBY:
                 setSentence('On attend encore quelques joueurs...');
                 break;
-            case State.QUESTION:
+            case types.State.QUESTION:
                 setSentence(question);
                 break;
-            case State.WAITING:
+            case types.State.WAITING:
                 if (answer) {
                     setSentence(`Terminé ! La bonne réponse était ${answer}`);
                 }
                 break;
-            case State.FINISHED:
+            case types.State.FINISHED:
                 setSentence('La partie est terminée ! Merci d\'avoir joué');
                 break;
             default:
@@ -126,7 +124,7 @@ export default function Game({ room, pseudo }: {room: RoomId, pseudo: Player}) {
         <>
             <div className={styles.container}>
                 <audio ref={correctAnswerAudio} src="/correct-answer.mp3" />
-                {(state == State.QUESTION) && (questionStartDate && questionEndDate) && <div style={{ position: "absolute", margin: "0.5rem", zIndex: 1 }}><Clock startDate={questionStartDate} endDate={questionEndDate} /></div>}
+                {(state == types.State.QUESTION) && (questionStartDate && questionEndDate) && <div style={{ position: "absolute", margin: "0.5rem", zIndex: 1 }}><Clock startDate={questionStartDate} endDate={questionEndDate} /></div>}
                 {sentence && <div style={{ position: "absolute", right: "1rem", top: "2rem", zIndex: 3 }}><DialogBox sentence={sentence} /></div>}
                 <div className={styles.column} style={{ backgroundColor: "hsl(285.77deg 96.04% 19.8%)", display: 'grid', justifyItems: "center" }}>
                     <div style={{ position: "relative", left: "40px", zIndex: 0 }}><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWlHhJXvhgtIYxbJRcBM2u9fpe5X1M9ZCDBg&s"></img></div>
