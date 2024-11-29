@@ -3,7 +3,7 @@
 
 import { types } from "@/types";
 import { useState } from "react";
-import { hostname } from "../../../shared/constants"
+import { hostname, gameServerUrl } from "../../../shared/constants"
 
 const CopyLinkTextbox = ({ link }: { link: string }) => {
     const [copySuccess, setCopySuccess] = useState("");
@@ -54,7 +54,7 @@ export default function Page() {
     function handleRoomCreation() {
         // redirect to the room page
         console.log("fetching room creation...");
-        fetch("/api/room/create", { method: "POST" })
+        fetch(`${gameServerUrl}/api/room/create`, { method: "POST" })
             .then(res => {
                 if (!res.ok) {
                     throw new Error(`HTTP error! status: ${res.status}`);

@@ -8,7 +8,8 @@ import DialogBox from './dialogueBox';
 import { useEffect, useRef, useState } from 'react';
 import { types } from '@/types';
 import { io, Socket } from 'socket.io-client';
-import { ChatMessage } from '../../../types';
+import { ChatMessage } from '@/types';
+import { gameServerHostname, gameServerPort, gameServerUrl } from '../../../../shared/constants';
 
 
 export default function Game({ room, pseudo }: {room: types.RoomId, pseudo: types.Player}) {
@@ -27,8 +28,8 @@ export default function Game({ room, pseudo }: {room: types.RoomId, pseudo: type
     const [sentence, setSentence] = useState<string | null>(null);
 
     useEffect(() => {
-        console.log(`Connecting to socket.io server...`);
-        socket.current = io({
+        console.log(`Connecting to socket.io server... ${gameServerUrl}`);
+        socket.current = io(gameServerUrl,{
             transports: ['websocket'],
         });
         console.log(`Connected to socket.io server`);

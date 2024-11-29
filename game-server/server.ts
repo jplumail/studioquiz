@@ -1,13 +1,12 @@
 import { GameState, ServerToClientEvents, State, Player, Score, SocketId, DateMilliseconds, RoomId, ClientToServerEvents, InterServerEvents, SocketData, Answer, Question } from "../shared/types.js";
-import { port } from "../shared/constants.js";
+import { gameServerPort, production } from "../shared/constants.js";
 import { createAdapter } from "@socket.io/gcp-pubsub-adapter";
 import { Server as SocketIOServer, Socket as SocketIOSocket } from 'socket.io';
 import { createServer, Server as NodeServer } from "node:http";
 import { PubSub } from "@google-cloud/pubsub";
 import express from "express";
+import cors from "cors";
 
-
-const production = process.env.NODE_ENV === 'production';
 
 const pubsub = new PubSub({
     projectId: "studioquiz",
@@ -177,6 +176,7 @@ export class WebsocketServer {
 
     constructor() {
         const api = express();
+        api.use(cors());
         api.use(express.json());
         api.use(express.urlencoded({ extended: true }));
 
@@ -196,8 +196,8 @@ export class WebsocketServer {
         const httpServer = createServer(api);
 
         console.log('Starting HTTP server...');
-        httpServer.listen(port, () => {
-            console.log(`HTTP server is running on port ${port}`);
+        httpServer.listen(gameServerPort, () => {
+            console.log(`HTTP server is running on port ${gameServerPort}`);
         });
 
         this.gameServers = {};
@@ -210,6 +210,10 @@ export class WebsocketServer {
             SocketData
         >(httpServer, {
             adapter: createAdapter(topic, { subscriptionOptions: { messageRetentionDuration: { seconds: 600 } } }),
+            cors: {
+                origin: "*",
+                methods: ["GET", "POST"]
+            }
         });
 
     }
