@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "build": "npm run build-gameserver",
     "build-gameserver": "tsc -b game-server",
     "dev-gameserver": "nodemon --watch . --ignore next-app --ext ts --exec \"npm run build-gameserver\"",
     "start-gameserver": "node dist/game-server/index.js",
