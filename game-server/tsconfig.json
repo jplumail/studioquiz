@@ -1,0 +1,9 @@
+{
+    "extends": "../tsconfig-base.json",
+    "files": [
+        "index.ts", "server.ts",
+    ],
+    "references": [
+        { "path": "../shared" }
+    ]
+}

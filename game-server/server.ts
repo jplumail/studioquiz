@@ -1,11 +1,10 @@
-import { GameState, ServerToClientEvents, State, Player, Score, SocketId, DateMilliseconds, RoomId, ClientToServerEvents, InterServerEvents, SocketData, Answer, Question } from "@/shared/types";
+import { GameState, ServerToClientEvents, State, Player, Score, SocketId, DateMilliseconds, RoomId, ClientToServerEvents, InterServerEvents, SocketData, Answer, Question } from "../shared/types.js";
+import { port } from "../shared/constants.js";
 import { createAdapter } from "@socket.io/gcp-pubsub-adapter";
 import { Server as SocketIOServer, Socket as SocketIOSocket } from 'socket.io';
 import { createServer, Server as NodeServer } from "node:http";
 import { PubSub } from "@google-cloud/pubsub";
 import express from "express";
-import { RequestHandler } from "next/dist/server/next";
-import { port } from "../constants";
 
 
 const production = process.env.NODE_ENV === 'production';
@@ -176,10 +175,14 @@ export class WebsocketServer {
         SocketData
     >;
 
-    constructor(handler: RequestHandler) {
+    constructor() {
         const api = express();
         api.use(express.json());
         api.use(express.urlencoded({ extended: true }));
+
+        api.get("/api/hello", (req, res) => {
+            res.status(200).json({ message: "Hello, world!" });
+        })
 
         api.post("/api/room/create", (req, res) => {
             const room = Math.random().toString(36).substring(7) as RoomId;
@@ -188,10 +191,6 @@ export class WebsocketServer {
             console.log("Room created:", room);
             res.status(200).json({ room: room });
         })
-
-        api.all('*', (req, res) => {
-            return handler(req, res);
-        });
 
         // Create an HTTP server
         const httpServer = createServer(api);
