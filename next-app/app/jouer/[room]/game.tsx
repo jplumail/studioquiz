@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from 'react';
 import { types } from '@/types';
 import { io, Socket } from 'socket.io-client';
 import { ChatMessage } from '@/types';
-import { gameServerHostname, gameServerPort, gameServerUrl } from '../../../../shared/constants';
+import { gameServerUrl } from '../../../../shared/constants';
 
 
 export default function Game({ room, pseudo }: {room: types.RoomId, pseudo: types.Player}) {
