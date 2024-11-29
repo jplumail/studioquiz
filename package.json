@@ -3,19 +3,31 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "tsc -b game-server",
-    "dev-gameserver": "nodemon --watch . --ignore next-app --ext ts --exec \"npm run build\"",
-    "start-gameserver": "node dist/game-server/index.js"
+    "build-gameserver": "tsc -b game-server",
+    "dev-gameserver": "nodemon --watch . --ignore next-app --ext ts --exec \"npm run build-gameserver\"",
+    "start-gameserver": "node dist/game-server/index.js",
+    "dev-nextapp": "next dev next-app",
+    "build-nextapp": "next build next-app",
+    "start-nextapp": "next start next-app",
+    "lint-nextapp": "next lint next-app"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
+    "@types/react": "18.3.12",
+    "eslint": "9.15.0",
+    "eslint-config-next": "15.0.3",
     "type-fest": "^4.29.0",
     "typescript": "^5.7.2"
   },
   "dependencies": {
+    "@apphosting/adapter-nextjs": "^14.0.9",
     "@google-cloud/pubsub": "^4.9.0",
     "@socket.io/gcp-pubsub-adapter": "^0.1.0",
     "express": "^4.21.1",
-    "socket.io": "^4.8.1"
+    "next": "^14.0.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
   }
 }
