@@ -20,6 +20,6 @@ npm run dev
 - [x] implement server-side rooms
 - [x] choose pseudo
 - [x] create room from client, share with link, join the room
-- [ ] separate gameserver/website
+- [x] separate gameserver/website
 - [ ] fix mobile display
 - [ ] generate questions
