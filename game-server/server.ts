@@ -1,4 +1,4 @@
-import { GameState, ServerToClientEvents, State, Player, Score, SocketId, DateMilliseconds, RoomId, ClientToServerEvents, InterServerEvents, SocketData, Answer, Question } from "../shared/types.js";
+import { GameState, ServerToClientEvents, State, Player, Score, SocketId, DateMilliseconds, RoomId, ClientToServerEvents, InterServerEvents, SocketData, Answer, Question, Socket } from "../shared/types.js";
 import { gameServerPort, production } from "../shared/constants.js";
 import { createAdapter } from "@socket.io/gcp-pubsub-adapter";
 import { Server as SocketIOServer, Socket as SocketIOSocket } from 'socket.io';
@@ -57,17 +57,17 @@ class GameServer {
         this.serverSideRoomEmit = serverSideRoomEmit;
     }
 
-    onConnection(socket: SocketIOSocket) {
+    onConnection(socket: Socket) {
         console.log('Client connected');
         this.roomEmit('scores', this.game.scores);
-        socket.on('registerPlayer', (player: Player) => {
+        socket.on('registerPlayer', (player) => {
             this.game.scores[player] = 0 as Score;
             this.game.registeredPlayers[socket.id as SocketId] = player;
             this.updateGame();
             this.sendScores();
         });
 
-        socket.on('playerMessage', (player: Player, message: string) => this.handlePlayerMessage(player, message));
+        socket.on('playerMessage', (player, message) => this.handlePlayerMessage(player, message));
         socket.on('askStartGame', () => this.startGame());
         socket.on('disconnect', () => this.unregisterClient(socket));
     }
@@ -76,7 +76,7 @@ class GameServer {
         this.serverSideRoomEmit(this.game);
     }
 
-    unregisterClient(socket: SocketIOSocket) {
+    unregisterClient(socket: Socket) {
         const player = this.game.registeredPlayers[socket.id as SocketId];
         if (player) {
             delete this.game.registeredPlayers[socket.id as SocketId];
@@ -218,7 +218,7 @@ export class WebsocketServer {
 
     }
 
-    async joinRoom(room: RoomId, socket: SocketIOSocket) {
+    async joinRoom(room: RoomId, socket: Socket) {
         socket.join(room);
         if (!this.roomExists(room)) {
             this.createRoom(room);
@@ -241,14 +241,14 @@ export class WebsocketServer {
     async init() {
         await this.io.of('/').adapter.init();
 
-        this.io.of("/").on('connection', (socket: SocketIOSocket) => {
-            socket.on('joinRoom', async (room: RoomId, callback) => {
+        this.io.of("/").on('connection', (socket) => {
+            socket.on('joinRoom', async (room, callback) => {
                 await this.joinRoom(room, socket)
                 callback();
             });
         })
-        this.io.of("/").on('gameState', (room: RoomId, newState: GameState) => {
-            if (!this.gameServers[room]) {
+        this.io.of("/").on('gameState', (room, newState) => {
+            if (!this.roomExists(room)) {
                 this.createRoom(room);
             }
             this.gameServers[room].game = newState;
