@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "npm run build-gameserver",
+    "gcp-build": "npm run build-gameserver",
     "build-gameserver": "tsc -b game-server",
     "dev-gameserver": "tsc-watch -b game-server --onSuccess \"node ./dist/game-server/src/index.js\"",
     "start-gameserver": "node dist/game-server/src/index.js",
