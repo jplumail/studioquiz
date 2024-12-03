@@ -19,8 +19,6 @@ steps:
         $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
     id: Push
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-    env:
-      - _VERCEL_URL=$_VERCEL_PROJECT_NAME-git-$BRANCH_NAME-$_VERCEL_SCOPE_SLUG.vercel.app
     args:
       - run
       - deploy
@@ -32,7 +30,7 @@ steps:
         --labels=managed-by=gcp-cloud-build-deploy-cloud-run,branch-name=$BRANCH_NAME,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
       - '--region=$_DEPLOY_REGION'
       - '--quiet'
-      - '--update-env-vars=VERCEL_URL=$_VERCEL_URL'
+      - '--update-env-vars=VERCEL_URL=$_VERCEL_PROJECT_NAME-git-$BRANCH_NAME-$_VERCEL_SCOPE_SLUG.vercel.app'
     id: Deploy
     entrypoint: gcloud
 images:
