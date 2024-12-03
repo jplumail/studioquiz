@@ -3,7 +3,7 @@
 
 import { types } from "@/types";
 import { useState } from "react";
-import { hostname, gameServerUrl } from "../../../shared/constants"
+import { mainServerHostname, gameServerUrl } from "../../../shared/constants"
 
 const CopyLinkTextbox = ({ link }: { link: string }) => {
     const [copySuccess, setCopySuccess] = useState("");
@@ -73,7 +73,7 @@ export default function Page() {
     return (
         <>
             <button onClick={handleRoomCreation}>Create Room</button>
-            {room && <><CopyLinkTextbox link={`${hostname}/${roomUrl}`} /><a href={roomUrl}><button>JOIN</button></a></>}
+            {room && <><CopyLinkTextbox link={`${mainServerHostname}/${roomUrl}`} /><a href={roomUrl}><button>JOIN</button></a></>}
         </>
     );
 }
