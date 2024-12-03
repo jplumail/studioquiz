@@ -1,5 +1,5 @@
-import { GameState, ServerToClientEvents, State, Player, Score, SocketId, DateMilliseconds, RoomId, ClientToServerEvents, InterServerEvents, SocketData, Answer, Question, Socket } from "../shared/types.js";
-import { gameServerPort, production } from "../shared/constants.js";
+import { GameState, ServerToClientEvents, State, Player, Score, SocketId, DateMilliseconds, RoomId, ClientToServerEvents, InterServerEvents, SocketData, Answer, Question, Socket } from "../../shared/types.js";
+import { gameServerPort, production, mainServerUrl } from "../../shared/constants.js";
 import { createAdapter } from "@socket.io/gcp-pubsub-adapter";
 import { Server as SocketIOServer, Socket as SocketIOSocket } from 'socket.io';
 import { createServer, Server as NodeServer } from "node:http";
@@ -181,7 +181,7 @@ export class WebsocketServer {
         api.use(express.urlencoded({ extended: true }));
 
         api.get("/api/hello", (req, res) => {
-            res.status(200).json({ message: "Hello, world!" });
+            res.status(200).json({ message: `Hello, world! Main server URL: ${mainServerUrl}` });
         })
 
         api.post("/api/room/create", (req, res) => {

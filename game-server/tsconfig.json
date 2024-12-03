@@ -1,8 +1,6 @@
 {
     "extends": "../tsconfig-base.json",
-    "files": [
-        "index.ts", "server.ts",
-    ],
+    "include": ["**/*.ts"],
     "references": [
         { "path": "../shared" }
     ]
