@@ -30,7 +30,7 @@ steps:
         --labels=managed-by=gcp-cloud-build-deploy-cloud-run,branch-name=$BRANCH_NAME,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
       - '--region=$_DEPLOY_REGION'
       - '--quiet'
-      - '--update-env-vars=VERCEL_URL=$_VERCEL_PROJECT_NAME-git-$BRANCH_NAME-$_VERCEL_SCOPE_SLUG.vercel.app'
+      - '--update-env-vars=BRANCH_NAME=$BRANCH_NAME'
       - '--allow-unauthenticated'
     id: Deploy
     entrypoint: gcloud
@@ -47,8 +47,6 @@ substitutions:
   _AR_HOSTNAME: europe-west9-docker.pkg.dev
   _PLATFORM: managed
   _SERVICE_NAME: studioquiz-gameserver
-  _VERCEL_SCOPE_SLUG: jeans-projects-0b2ad0ac
-  _VERCEL_PROJECT_NAME: studioquiz
 tags:
   - gcp-cloud-build-deploy-cloud-run
   - gcp-cloud-build-deploy-cloud-run-managed
