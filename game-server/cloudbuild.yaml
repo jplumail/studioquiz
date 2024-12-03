@@ -31,6 +31,7 @@ steps:
       - '--region=$_DEPLOY_REGION'
       - '--quiet'
       - '--update-env-vars=VERCEL_URL=$_VERCEL_PROJECT_NAME-git-$BRANCH_NAME-$_VERCEL_SCOPE_SLUG.vercel.app'
+      - '--allow-unauthenticated'
     id: Deploy
     entrypoint: gcloud
 images:
