@@ -32,7 +32,7 @@ steps:
         --labels=managed-by=gcp-cloud-build-deploy-cloud-run,branch-name=$BRANCH_NAME,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
       - '--region=$_DEPLOY_REGION'
       - '--quiet'
-      - '--update-env-vars=VERCEL_URL=_VERCEL_URL'
+      - '--update-env-vars=VERCEL_URL=$_VERCEL_URL'
     id: Deploy
     entrypoint: gcloud
 images:
