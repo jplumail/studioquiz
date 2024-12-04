@@ -1,21 +1,19 @@
 steps:
-  - name: gcr.io/k8s-skaffold/pack
-    env:
-      - GOOGLE_ENTRYPOINT=$_ENTRYPOINT
+  - name: gcr.io/cloud-builders/docker
     args:
       - build
+      - --tag
       - >-
         $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
-      - '--builder=gcr.io/buildpacks/builder:v1'
-      - --cache-image
+      - '--file=game-server.Dockerfile'
+      - '.'
+    id: Build
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
       - >-
-        europe-west9-docker.pkg.dev/studioquiz/cloud-run-source-deploy/studioquiz/studioquiz-gameserver/cache
-      - '--network=cloudbuild'
-      - '--path=.'
-      - '--env=GOOGLE_ENTRYPOINT'
-      - --publish
-    id: Buildpack
-    entrypoint: pack
+        $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+    id: Push
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     args:
       - run

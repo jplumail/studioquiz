@@ -3,6 +3,10 @@
   "type": "module",
   "version": "1.0.0",
   "main": "./dist/src/index.js",
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "scripts": {
     "build": "tsc -b .",
     "dev": "tsc-watch -b . --onSuccess \"npm run start\"",
