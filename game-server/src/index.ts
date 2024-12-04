@@ -1,5 +1,4 @@
 import { WebsocketServer } from "./server.js";
-import { generateQuestion} from "./generate-questions.js";
 
 import dotenv from "dotenv";
 

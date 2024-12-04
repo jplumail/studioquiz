@@ -1,13 +1,24 @@
+### Install
+
+```
+pnpm install
+```
+
 ### Run locally
 
+Launch game server:
 ```
 gcloud components install pubsub-emulator
 gcloud beta emulators pubsub start --project=studioquiz
 $(gcloud beta emulators pubsub env-init)
+cd game-server
+pnpm dev
 ```
 
+Launch Next app:
 ```
-npm run dev
+cd next-app
+pnpm dev
 ```
 
 ### TODO

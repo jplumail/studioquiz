@@ -1,0 +1,21 @@
+{
+  "name": "shared",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/src/index.d.ts",
+        "node": "./dist/src/index.js",
+        "default": "./dist/src/index.js"
+      }
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "socket.io": "^4.8.1",
+    "socket.io-adapter": "^2.5.5",
+    "type-fest": "^4.30.0"
+  }
+}

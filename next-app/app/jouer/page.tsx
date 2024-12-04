@@ -3,7 +3,7 @@
 
 import { types } from "@/types";
 import { useState } from "react";
-import { mainServerHostname, gameServerUrl } from "../../../shared/constants"
+import { mainServerHostname, gameServerUrl } from "shared"
 
 const CopyLinkTextbox = ({ link }: { link: string }) => {
     const [copySuccess, setCopySuccess] = useState("");

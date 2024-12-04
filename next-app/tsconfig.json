@@ -31,11 +31,11 @@
     }
   },
   "include": [
-    "../next-env.d.ts",
+    "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "../next.config.js",
+    "next.config.js",
     "dist/types/**/*.ts",
     "../dist/types/**/*.ts",
     "../.next/types/**/*.ts",

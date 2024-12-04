@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 const openai = new OpenAI();
 
-export function generateQuestion() {
+function generateQuestion() {
     return openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [

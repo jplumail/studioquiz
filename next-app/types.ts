@@ -1,5 +1,5 @@
-import { Question, Answer, Player } from '../shared/types';
-export * as types from '../shared/types';
+import { Question, Answer, Player } from 'shared';
+export * as types from 'shared';
 
 
 type ChatMessage = {

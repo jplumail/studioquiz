@@ -1,5 +1,5 @@
-import { GameState, ServerToClientEvents, State, Player, Score, SocketId, DateMilliseconds, RoomId, ClientToServerEvents, InterServerEvents, SocketData, Answer, Question, Socket } from "../../shared/types.js";
-import { gameServerPort, production, mainServerUrl } from "../../shared/constants.js";
+import { GameState, ServerToClientEvents, State, Player, Score, SocketId, DateMilliseconds, RoomId, ClientToServerEvents, InterServerEvents, SocketData, Answer, Question, Socket } from "shared";
+import { gameServerPort, production, mainServerUrl } from "shared";
 import { createAdapter } from "@socket.io/gcp-pubsub-adapter";
 import { Server as SocketIOServer, Socket as SocketIOSocket } from 'socket.io';
 import { createServer, Server as NodeServer } from "node:http";
