@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "tsc -b . && next build",
+    "vercel-build": "tsc -b . && next build",
     "start": "next start"
   },
   "dependencies": {
