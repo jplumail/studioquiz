@@ -48,6 +48,14 @@ interface GameState {
     registeredPlayers: Record<SocketId, Player>,
 }
 
+// api
+// /api/questions/generate
+// POST
+export interface GenerateQuestion {
+    question: Question,
+    answer: Answer,
+}
+
 export enum State {
     LOBBY,
     FINISHED,

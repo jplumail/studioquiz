@@ -1,5 +1,7 @@
 import { GameState, ServerToClientEvents, State, Player, Score, SocketId, DateMilliseconds, RoomId, ClientToServerEvents, InterServerEvents, SocketData, Answer, Question, Socket } from "shared";
 import { gameServerPort, production, mainServerUrl } from "shared";
+import { generateQuestion } from "./generate-questions.js";
+
 import { createAdapter } from "@socket.io/gcp-pubsub-adapter";
 import { Server as SocketIOServer, Socket as SocketIOSocket } from 'socket.io';
 import { createServer, Server as NodeServer } from "node:http";
@@ -24,8 +26,7 @@ topic.exists().then(([exists]) => {
     }
 });
 
-const placeholderQuestions = ["What is the capital of France?", "What is the capital of Germany?", "What is the capital of Italy?"] as Question[];
-const placeholderAnswers = ["Paris", "Berlin", "Rome"] as Answer[];
+const themes = ["histoire", "géographie", "sciences", "sport", "arts", "littérature", "cinéma", "musique", "cuisine", "informatique", "mathématiques"];
 
 const pointsArray: number[] = [4, 3, 3, 2, 1, 1, 1, 1];
 const countdown = 10 * 1000 as DateMilliseconds;  // 10 seconds
@@ -44,11 +45,23 @@ class GameServer {
         roomEmit: (event: keyof ServerToClientEvents, ...args: Parameters<ServerToClientEvents[keyof ServerToClientEvents]>) => void,
         serverSideRoomEmit: (state: GameState) => boolean
     ) {
+        // generate questions
+        const questions = [] as Question[];
+        const answers = [] as Answer[];
+        for (let i = 0; i < 10; i++) {
+            const theme = themes[Math.floor(Math.random() * themes.length)];
+            const difficulty = Math.floor(Math.random() * 3) + 1;
+            generateQuestion(theme, difficulty).then((data) => {
+                questions.push(data.question);
+                answers.push(data.answer);
+            });
+        }
+
         this.game = {
             scores: {},
             currentIndex: 0,
-            questions: placeholderQuestions,
-            answers: placeholderAnswers,
+            questions: questions,
+            answers: answers,
             hasAnswered: {},
             status: State.LOBBY,
             registeredPlayers: {},

@@ -1,15 +1,19 @@
-import OpenAI from "openai";
-const openai = new OpenAI();
+import { GenerateQuestion, mainServerUrl } from "shared";
 
-function generateQuestion() {
-    return openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-            { role: "system", content: "You are a helpful assistant." },
-            {
-                role: "user",
-                content: "Write a haiku about recursion in programming.",
-            },
-        ],
-    });
+
+export function generateQuestion(subject: string, difficulty: number): Promise<GenerateQuestion> {
+    return fetch(`${mainServerUrl}/api/questions/generate`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ subject, difficulty }),
+    })
+    .then((response) => {
+        if (!response.ok) {
+            throw new Error(`Failed to generate question: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then((data: GenerateQuestion) => data);
 }
