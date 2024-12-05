@@ -1,6 +1,6 @@
 import { GameState, ServerToClientEvents, State, Player, Score, SocketId, DateMilliseconds, RoomId, ClientToServerEvents, InterServerEvents, SocketData, Answer, Question, Socket } from "shared";
 import { gameServerPort, production, mainServerUrl } from "shared";
-import { generateQuestion } from "./generate-questions.js";
+import { generateQuestion, validateAnswer } from "./remoteCall.js";
 
 import { createAdapter } from "@socket.io/gcp-pubsub-adapter";
 import { Server as SocketIOServer, Socket as SocketIOSocket } from 'socket.io';
@@ -145,18 +145,21 @@ class GameServer {
         this.updateGame();
     }
 
-    handlePlayerMessage(player: Player, message: string) {
+    async handlePlayerMessage(player: Player, message: string) {
         if (this.game.status == State.QUESTION) {
             if (!this.game.hasAnswered[player]) {
-                if ((this.game.currentIndex >= 0) && (this.game.currentIndex < this.game.answers.length) && this.checkAnswer(message, this.game.answers[this.game.currentIndex])) {
-                    const score = this.game.scores[player];
-                    if (score !== undefined) {
-                        const numCorrect = Object.values(this.game.hasAnswered).filter(value => value).length;
-                        const newScore = score + pointsArray[numCorrect] as Score;
-                        this.game.scores[player] = newScore;
-                        this.sendScores();
-                        this.roomEmit('correctAnswer', player, pointsArray[numCorrect]);
-                        this.game.hasAnswered[player] = true;
+                if ((this.game.currentIndex >= 0) && (this.game.currentIndex < this.game.answers.length)) {
+                    const validate = await this.checkAnswer(message as Answer, this.game.answers[this.game.currentIndex]);
+                    if (validate) {
+                        const score = this.game.scores[player];
+                        if (score !== undefined) {
+                            const numCorrect = Object.values(this.game.hasAnswered).filter(value => value).length;
+                            const newScore = score + pointsArray[numCorrect] as Score;
+                            this.game.scores[player] = newScore;
+                            this.sendScores();
+                            this.roomEmit('correctAnswer', player, pointsArray[numCorrect]);
+                            this.game.hasAnswered[player] = true;
+                        }
                     }
                 }
             }
@@ -169,8 +172,15 @@ class GameServer {
         this.updateGame();
     }
 
-    checkAnswer(attempt: string, answer: string): boolean {
-        return attempt.toLowerCase() === answer.toLowerCase();
+    checkAnswer(attempt: Answer, answer: Answer) {
+        const question = this.game.questions[this.game.currentIndex];
+        if (attempt.toLowerCase() === answer.toLowerCase()) {
+            return true;
+        } else {
+            return validateAnswer(question, answer, attempt).then((data) => {
+                return data.correct === true;
+            });
+        };
     }
 
     sendScores() {
