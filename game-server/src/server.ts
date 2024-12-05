@@ -243,8 +243,12 @@ export class WebsocketServer {
 
         this.io.of("/").on('connection', (socket) => {
             socket.on('joinRoom', async (room, callback) => {
-                await this.joinRoom(room, socket)
-                callback();
+                if (this.roomExists(room)) {
+                    await this.joinRoom(room, socket);
+                    callback();
+                } else {
+                    console.log("Room does not exist:", room);
+                }
             });
         })
         this.io.of("/").on('gameState', (room, newState) => {

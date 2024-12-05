@@ -34,3 +34,4 @@ pnpm dev
 - [x] separate gameserver/website
 - [ ] fix mobile display
 - [ ] generate questions
+- [x] passer par create room pour créer les rooms, interdire la connexion sinon
