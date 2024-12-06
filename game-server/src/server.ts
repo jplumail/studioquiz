@@ -46,9 +46,10 @@ class GameServer {
         serverSideRoomEmit: (state: GameState) => boolean
     ) {
         // generate questions
+        const nbQuestions = 10;
         const questions = [] as Question[];
         const answers = [] as Answer[];
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < nbQuestions; i++) {
             const theme = themes[Math.floor(Math.random() * themes.length)];
             const difficulty = Math.floor(Math.random() * 3) + 1;
             generateQuestion(theme, difficulty).then((data) => {
