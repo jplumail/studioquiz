@@ -29,7 +29,7 @@ topic.exists().then(([exists]) => {
 const themes = ["histoire", "géographie", "sciences", "sport", "arts", "littérature", "cinéma", "musique", "cuisine", "informatique", "mathématiques"];
 
 const pointsArray: number[] = [4, 3, 3, 2, 1, 1, 1, 1];
-const countdown = 10 * 1000 as DateMilliseconds;  // 10 seconds
+const countdown = 20 * 1000 as DateMilliseconds;  // 10 seconds
 
 
 function getCurrentTime() {
