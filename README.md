@@ -32,6 +32,6 @@ pnpm dev
 - [x] choose pseudo
 - [x] create room from client, share with link, join the room
 - [x] separate gameserver/website
-- [ ] fix mobile display
+- [x] fix mobile display
 - [x] generate questions
 - [x] passer par create room pour créer les rooms, interdire la connexion sinon
