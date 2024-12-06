@@ -34,7 +34,8 @@ export default function Game({ room, pseudo }: { room: types.RoomId, pseudo: typ
         console.log(`Connected to socket.io server`);
 
         console.log(`Joining room ${room}`);
-        socket.current.timeout(1000).emit('joinRoom', room, (error) => { error ? console.error('Error joining room', error) : console.log('Joined room') });
+        const roomStartupTimeout = 10 * 1000;  // 10 seconds
+        socket.current.timeout(roomStartupTimeout).emit('joinRoom', room, (error) => { error ? console.error('Error joining room', error) : console.log('Joined room') });
 
         socket.current.emit('registerPlayer', pseudo);
 
