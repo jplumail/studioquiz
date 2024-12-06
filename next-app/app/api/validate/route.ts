@@ -1,6 +1,10 @@
 import OpenAI from "openai";
+import { baseURL, model } from "../constants";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    baseURL: baseURL,
+});
 
 export async function POST(request: Request) {
     const data: {
@@ -9,7 +13,7 @@ export async function POST(request: Request) {
         playerAnswer: string,
     } = await request.json()
     const completions = await openai.beta.chat.completions.parse({
-        model: 'gpt-4o',
+        model: model,
         messages: [
             {
                 role: 'system',

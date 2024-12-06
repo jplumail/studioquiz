@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import OpenAI from 'openai';
+import { baseURL, model } from '../../constants';
 
 const system_prompt = `Générer des questions de quiz similaires à celles du jeu “Questions pour un Champion”, différenciées par trois niveaux de difficulté. Les questions doivent être stimulantes et chaque entrée doit inclure à la fois la question et la réponse attendue, formatées en JSON.
 
@@ -77,16 +78,18 @@ Notes
  - Veillez à ce que les questions soient conçues pour correspondre au niveau de connaissance approprié pour chaque degré de difficulté.
  - Assurez clarté et précision dans les questions et les réponses."`
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: baseURL,
+});
 
 export async function POST(request: Request) {
-  console.log('POST /api/questions/generate');
   const data: {
     subject: string,
     difficulty: number,
   } = await request.json()
   const completions = await openai.beta.chat.completions.parse({
-    model: 'gpt-4o',
+    model: model,
     messages: [
       {
         role: 'system',
