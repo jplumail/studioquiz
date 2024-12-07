@@ -10,7 +10,7 @@ import { types, ChatMessage } from '@/types';
 import { io, Socket } from 'socket.io-client';
 import { gameServerUrl } from 'shared';
 import Image from 'next/image';
-import imagePresentateur from '@/public/presentateur.jpeg';
+import imagePresentateur from '../../../public/presentateur.jpeg';
 
 
 export default function Game({ room, pseudo }: { room: types.RoomId, pseudo: types.Player }) {
