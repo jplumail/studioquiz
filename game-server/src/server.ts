@@ -54,7 +54,7 @@ class GameServer {
             hasAnswered: {},
             status: State.LOBBY,
             registeredPlayers: {},
-            nbQuestions: 1,
+            nbQuestions: 10,
         };
         this.roomEmit = roomEmit;
         this.serverSideRoomEmit = serverSideRoomEmit;
