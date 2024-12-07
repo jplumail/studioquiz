@@ -3,8 +3,7 @@
     display: grid;
     overflow: hidden;
     grid-template-rows:
-        [top] min-content
-        [chat] auto;
+        [top] min-content [chat] auto;
     gap: 0;
     position: relative;
     height: 100%;
@@ -17,6 +16,14 @@
     width: auto;
 }
 
+#dialogueBox {
+    background-color: white;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    color: hsl(31.35deg 73.55% 52.55%);
+    font-weight: 700;
+}
+
 @media screen and (min-width: 750px) {
     .container {
         width: 750px;
@@ -24,8 +31,15 @@
         grid-template-rows: none;
         height: 450px;
     }
+
     #presentateur {
         height: 250px;
+    }
+
+    #dialogueBox {
+        position: absolute;
+        right: 1rem;
+        top: 2rem;
     }
 }
 

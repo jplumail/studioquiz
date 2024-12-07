@@ -127,9 +127,9 @@ export default function Game({ room, pseudo }: { room: types.RoomId, pseudo: typ
             <div className={styles.container}>
                 <audio ref={correctAnswerAudio} src="/correct-answer.mp3" />
                 {(state == types.State.QUESTION) && (questionStartDate && questionEndDate) && <div style={{ position: "absolute", margin: "0.5rem", zIndex: 1 }}><Clock startDate={questionStartDate} endDate={questionEndDate} /></div>}
-                {sentence && <div style={{ position: "absolute", right: "1rem", top: "2rem", zIndex: 3 }}><DialogBox sentence={sentence} /></div>}
                 <div className={styles.column} style={{ backgroundColor: "hsl(285.77deg 96.04% 19.8%)", display: 'grid', justifyItems: "center" }}>
                     <div style={{ position: "relative", left: "40px", zIndex: 0 }}><Image src='/presentateur.jpeg' width={219} height={230} alt='Présentateur' id={styles.presentateur}/></div>
+                    {sentence && <DialogBox sentence={sentence} />}
                     <Scoreboard scores={scores} hasAnswered={hasAnswered} />
                 </div>
                 <div className={styles.column}>
