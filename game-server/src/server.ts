@@ -125,12 +125,14 @@ class GameServer {
     }
 
     async startGame() {
-        await this.resetGame();
-        this.roomEmit('startGame');
-        this.game.currentIndex = -1;
-        this.game.status = State.WAITING;
-        this.nextQuestion();
-        this.updateGame();
+        if (this.game.status == State.LOBBY || this.game.status == State.FINISHED) {
+            await this.resetGame();
+            this.roomEmit('startGame');
+            this.game.currentIndex = -1;
+            this.game.status = State.WAITING;
+            this.nextQuestion();
+            this.updateGame();
+        }
     }
 
     nextQuestion() {
@@ -166,7 +168,7 @@ class GameServer {
 
     endGame() {
         this.roomEmit('endGame');
-        this.game.status = State.WAITING;
+        this.game.status = State.FINISHED;
         this.updateGame();
     }
 
