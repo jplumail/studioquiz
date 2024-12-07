@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import localFont from "next/font/local";
 import "./globals.css";
@@ -19,6 +19,10 @@ export const metadata: Metadata = {
   description: "Un jeu de culture générale",
 };
 
+export const viewport: Viewport = {
+  interactiveWidget: "resizes-content",
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -26,7 +30,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content" />
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         {children}
       </body>
