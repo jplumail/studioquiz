@@ -10,9 +10,13 @@ Launch game server:
 ```
 gcloud components install pubsub-emulator
 gcloud beta emulators pubsub start --project=studioquiz
+
 $(gcloud beta emulators pubsub env-init)
 cd game-server
 pnpm dev
+
+# reverse proxy for LMStudio
+mitmdump --mode reverse:http://localhost:1234 -p 1235
 ```
 
 Launch Next app:

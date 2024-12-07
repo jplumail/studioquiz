@@ -1,9 +1,10 @@
 import OpenAI from "openai";
-import { baseURL, model } from "../constants";
+import { model } from "../constants";
+import { openAIBaseURL } from "shared";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
-    baseURL: baseURL,
+    baseURL: openAIBaseURL,
 });
 
 export async function POST(request: Request) {
