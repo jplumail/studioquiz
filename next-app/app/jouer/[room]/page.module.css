@@ -2,11 +2,18 @@
     margin: auto;
     display: grid;
     overflow: hidden;
-    grid-template-rows: 1fr 1fr;
+    grid-template-rows:
+        [top] min-content
+        [chat] auto;
     gap: 0;
     position: relative;
-    height: 100vh;
+    height: 100%;
     width: 100%;
+}
+
+#presentateur {
+    height: 150px;
+    width: auto;
 }
 
 @media screen and (min-width: 750px) {
@@ -15,6 +22,9 @@
         grid-template-columns: 1fr 1fr;
         grid-template-rows: none;
         height: 450px;
+    }
+    #presentateur {
+        height: 250px;
     }
 }
 
