@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import styles from './page.module.css';
 import { Player, Answer } from 'shared';
-import {ChatMessage} from '../../../types';
+import { ChatMessage } from '../../../types';
 
 
 const player: Player = "haha" as Player;
@@ -101,22 +101,20 @@ function TextArea({ sendMessage }: TextAreaProps) {
     };
 
     return (
-        <div id={styles.answer}>
-            <form onSubmit={handleSubmit}>
-                <textarea
-                    autoFocus
-                    rows={1}
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleSubmit(e as React.FormEvent);
-                        }
-                    }}
-                ></textarea>
-                <button type="submit">Répondre</button>
-            </form>
-        </div>
+        <form id={styles.answer} onSubmit={handleSubmit}>
+            <textarea
+                autoFocus
+                rows={1}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleSubmit(e as React.FormEvent);
+                    }
+                }}
+            ></textarea>
+            <button type="submit">Répondre</button>
+        </form>
     );
 }
