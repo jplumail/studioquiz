@@ -143,10 +143,10 @@ class GameServer {
                 this.updateGame();
                 return;
             }
-            this.game.hasAnswered = Object.keys(this.game.registeredPlayers).reduce((acc, player) => {
+            this.game.hasAnswered = Object.values(this.game.registeredPlayers).reduce((acc, player) => {
                 acc[player] = false;
                 return acc;
-            }, {} as Record<string, boolean>);
+            }, {} as Record<Player, boolean>);
 
             const endTime = getCurrentTime() + countdown as DateMilliseconds;
             this.roomEmit('startQuestion', this.game.questions[this.game.currentIndex], this.game.currentIndex + 1, endTime);
