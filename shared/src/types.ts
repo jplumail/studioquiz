@@ -40,12 +40,13 @@ type SocketId = Tagged<string, 'SocketId'>;
 
 interface GameState {
     scores: Record<Player, Score>,
-    currentIndex: number,
+    currentIndex: number | null,
     questions: Question[],
     answers: Answer[],
     hasAnswered: Record<Player, boolean>,
     status: State,
     registeredPlayers: Record<SocketId, Player>,
+    nbQuestions: number,
 }
 
 // api

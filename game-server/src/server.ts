@@ -45,35 +45,58 @@ class GameServer {
         roomEmit: (event: keyof ServerToClientEvents, ...args: Parameters<ServerToClientEvents[keyof ServerToClientEvents]>) => void,
         serverSideRoomEmit: (state: GameState) => boolean
     ) {
-        // generate questions
-        const nbQuestions = 10;
-        const questions = [] as Question[];
-        const answers = [] as Answer[];
-        for (let i = 0; i < nbQuestions; i++) {
-            const theme = themes[Math.floor(Math.random() * themes.length)];
-            const difficulty = Math.floor(Math.random() * 3) + 1;
-            generateQuestion(theme, difficulty).then((data) => {
-                questions.push(data.question);
-                answers.push(data.answer);
-            });
-        }
-
         this.game = {
             scores: {},
             currentIndex: 0,
-            questions: questions,
-            answers: answers,
+            questions: [],
+            answers: [],
             hasAnswered: {},
             status: State.LOBBY,
             registeredPlayers: {},
-        }
+            nbQuestions: 1,
+        };
         this.roomEmit = roomEmit;
         this.serverSideRoomEmit = serverSideRoomEmit;
     }
 
+    resetGame() {
+        const scores = {} as Record<Player, Score>;
+        Object.keys(this.game.scores).forEach((player) => {
+            scores[player as Player] = 0 as Score;
+        });
+        this.game = {
+            scores: scores,
+            currentIndex: null,
+            questions: [],
+            answers: [],
+            hasAnswered: {},
+            status: State.LOBBY,
+            registeredPlayers: this.game.registeredPlayers,
+            nbQuestions: this.game.nbQuestions,
+        }
+        this.game.questions = [];
+        this.game.answers = [];
+        const firstQuestion = this.getQuestions();
+        this.sendScores();
+        return firstQuestion;
+    }
+
+    getQuestions() {
+        const generateQuestionsPromises: Promise<any>[] = [];
+        for (let i = 0; i < this.game.nbQuestions - this.game.questions.length; i++) {
+            const theme = themes[Math.floor(Math.random() * themes.length)];
+            const difficulty = Math.floor(Math.random() * 3) + 1;
+            generateQuestionsPromises.push(generateQuestion(theme, difficulty).then((data) => {
+                this.game.questions.push(data.question);
+                this.game.answers.push(data.answer);
+            }));
+        }
+        return generateQuestionsPromises[0];
+    }
+
     onConnection(socket: Socket) {
         console.log('Client connected');
-        this.roomEmit('scores', this.game.scores);
+        this.sendScores();
         socket.on('registerPlayer', (player) => {
             this.game.scores[player] = 0 as Score;
             this.game.registeredPlayers[socket.id as SocketId] = player;
@@ -101,7 +124,8 @@ class GameServer {
         console.log('Client disconnected');
     }
 
-    startGame() {
+    async startGame() {
+        await this.resetGame();
         this.roomEmit('startGame');
         this.game.currentIndex = -1;
         this.game.status = State.WAITING;
@@ -142,15 +166,15 @@ class GameServer {
 
     endGame() {
         this.roomEmit('endGame');
-        this.game.status = State.FINISHED;
+        this.game.status = State.WAITING;
         this.updateGame();
     }
 
     async handlePlayerMessage(player: Player, message: string) {
-        if (this.game.status == State.QUESTION) {
+        if (this.game.status == State.QUESTION && this.game.currentIndex !== null) {
             if (!this.game.hasAnswered[player]) {
                 if ((this.game.currentIndex >= 0) && (this.game.currentIndex < this.game.answers.length)) {
-                    const validate = await this.checkAnswer(message as Answer, this.game.answers[this.game.currentIndex]);
+                    const validate = await this.checkAnswer(message as Answer);
                     if (validate) {
                         const score = this.game.scores[player];
                         if (score !== undefined) {
@@ -173,15 +197,23 @@ class GameServer {
         this.updateGame();
     }
 
-    checkAnswer(attempt: Answer, answer: Answer) {
-        const question = this.game.questions[this.game.currentIndex];
-        if (attempt.toLowerCase() === answer.toLowerCase()) {
-            return true;
+    checkAnswer(attempt: Answer) {
+        let prom: Promise<boolean>;
+        if (this.game.currentIndex !== null) {
+            const question = this.game.questions[this.game.currentIndex];
+            const answer = this.game.answers[this.game.currentIndex];
+            if (attempt.toLowerCase() === answer.toLowerCase()) {
+                prom = new Promise((resolution, reject) => resolution(true));
+            } else {
+                prom = validateAnswer(question, answer, attempt).then((data) => {
+                    return data.correct === true;
+                });
+            };
         } else {
-            return validateAnswer(question, answer, attempt).then((data) => {
-                return data.correct === true;
-            });
-        };
+            prom = new Promise((resolution, reject) => resolution(false));
+        }
+        return prom;
+
     }
 
     sendScores() {
@@ -210,9 +242,7 @@ export class WebsocketServer {
 
         api.post("/api/room/create", (req, res) => {
             const room = Math.random().toString(36).substring(7) as RoomId;
-            console.log("Creating room:", room);
             this.createRoom(room);
-            console.log("Room created:", room);
             res.status(200).json({ room: room });
         })
 
