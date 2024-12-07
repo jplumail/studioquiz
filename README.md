@@ -37,4 +37,5 @@ pnpm dev
 - [x] passer par create room pour créer les rooms, interdire la connexion sinon
 - [ ] joining room fails when server is cold
 - [ ] questions database
-- [ ] restart game easily
+- [x] restart game easily
+- [ ] lien généré par create game en prod ne sont pas bon
