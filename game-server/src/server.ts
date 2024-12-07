@@ -40,6 +40,7 @@ class GameServer {
     game: GameState;
     roomEmit: (event: keyof ServerToClientEvents, ...args: Parameters<ServerToClientEvents[keyof ServerToClientEvents]>) => void;
     serverSideRoomEmit: (state: GameState) => boolean;
+    endQuestionCallback: NodeJS.Timeout | null;
 
     constructor(
         roomEmit: (event: keyof ServerToClientEvents, ...args: Parameters<ServerToClientEvents[keyof ServerToClientEvents]>) => void,
@@ -57,6 +58,7 @@ class GameServer {
         };
         this.roomEmit = roomEmit;
         this.serverSideRoomEmit = serverSideRoomEmit;
+        this.endQuestionCallback = null;
     }
 
     resetGame() {
@@ -152,7 +154,7 @@ class GameServer {
             this.roomEmit('startQuestion', this.game.questions[this.game.currentIndex], this.game.currentIndex + 1, endTime);
             this.game.status = State.QUESTION;
             this.updateGame();
-            setTimeout(() => this.endQuestion(), countdown);
+            this.endQuestionCallback = setTimeout(() => this.endQuestion(), countdown);
         }
     }
 
@@ -192,6 +194,10 @@ class GameServer {
             }
             if (!this.game.hasAnswered[player]) {
                 this.roomEmit('playerMessage', player, message);
+            }
+            if (this.endQuestionCallback !== null && Object.values(this.game.hasAnswered).every(Boolean)) {
+                clearTimeout(this.endQuestionCallback);
+                this.endQuestion();
             }
         } else {
             this.roomEmit('playerMessage', player, message);
