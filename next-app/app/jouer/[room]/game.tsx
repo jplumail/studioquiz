@@ -123,18 +123,16 @@ export default function Game({ room, pseudo }: { room: types.RoomId, pseudo: typ
     };
 
     return (
-        <div style={{ height: "100%", width: "100%", display: 'flex' }}>
-            <div className={styles.container}>
-                <audio ref={correctAnswerAudio} src="/correct-answer.mp3" />
-                {(state == types.State.QUESTION) && (questionStartDate && questionEndDate) && <div style={{ position: "absolute", margin: "0.5rem", zIndex: 1 }}><Clock startDate={questionStartDate} endDate={questionEndDate} /></div>}
-                <div className={styles.column} style={{ backgroundColor: "hsl(285.77deg 96.04% 19.8%)", display: 'grid', justifyItems: "center" }}>
-                    <div style={{ position: "relative", left: "40px", zIndex: 0 }}><Image src='/presentateur.jpeg' width={219} height={230} alt='Présentateur' id={styles.presentateur}/></div>
-                    {sentence && <DialogBox sentence={sentence} />}
-                    <Scoreboard scores={scores} hasAnswered={hasAnswered} />
-                </div>
-                <div className={styles.column}>
-                    <Chat sendMessage={sendMessage} messages={messages} />
-                </div>
+        <div id={styles.gameContainer}>
+            <audio ref={correctAnswerAudio} src="/correct-answer.mp3" />
+            {(state == types.State.QUESTION) && (questionStartDate && questionEndDate) && <div style={{ position: "absolute", margin: "0.5rem", zIndex: 1 }}><Clock startDate={questionStartDate} endDate={questionEndDate} /></div>}
+            <div className={styles.column} style={{ backgroundColor: "hsl(285.77deg 96.04% 19.8%)", display: 'grid', justifyItems: "center" }}>
+                <div style={{ position: "relative", left: "40px", zIndex: 0 }}><Image src='/presentateur.jpeg' width={219} height={230} alt='Présentateur' id={styles.presentateur}/></div>
+                {sentence && <DialogBox sentence={sentence} />}
+                <Scoreboard scores={scores} hasAnswered={hasAnswered} />
+            </div>
+            <div className={styles.column}>
+                <Chat sendMessage={sendMessage} messages={messages} />
             </div>
         </div>
     )

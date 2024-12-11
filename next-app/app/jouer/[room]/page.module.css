@@ -1,12 +1,10 @@
-.container {
-    margin: auto;
+#gameContainer {
     display: grid;
     overflow: hidden;
     grid-template-rows:
         [top] min-content [chat] auto;
     gap: 0;
     position: relative;
-    height: 100%;
     width: 100%;
 }
 
@@ -25,11 +23,9 @@
 }
 
 @media screen and (min-width: 750px) {
-    .container {
-        width: 750px;
+    #gameContainer {
         grid-template-columns: 1fr 1fr;
         grid-template-rows: none;
-        height: 450px;
     }
 
     #presentateur {
