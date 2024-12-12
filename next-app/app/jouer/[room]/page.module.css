@@ -10,11 +10,11 @@
 }
 
 #left {
-    background-color: var(--main-color-secondary);
+    background-color: hsl(var(--main-color-secondary));
 }
 
 #right {
-    background-image: linear-gradient(var(--secondary-color-darker), var(--secondary-color));
+    background-image: linear-gradient(hsl(var(--secondary-color-darker)), hsl(var(--secondary-color)));
     font-size: 1.3rem;
 }
 
@@ -74,7 +74,7 @@
     overflow: hidden;
     height: 2rem;
     align-content: center;
-    background-color: var(--secondary-color-darker);
+    background-color: hsl(var(--secondary-color-darker));
     padding-inline: 0.5rem;
     box-shadow: inset 0px 2px 3px 1px black,
         inset 0px 0px 1px 1px black;
@@ -84,7 +84,7 @@
     border-radius: 3px;
     border-style: solid;
     border-width: 2px;
-    border-color: var(--secondary-color-lighter);
+    border-color: hsl(var(--secondary-color-lighter));
 
 }
 
@@ -93,35 +93,74 @@
 }
 
 .boutonBombe {
+    --_bg-light: white;
+    --_bg-dark: black;
+    --_bg: var(--_bg-light);
+
+    --_highlight-size: 0;
+
+    --_highlight-light: hsl(210 10% 71% / 25%);
+    --_highlight-dark: hsl(210 10% 5% / 25%);
+    --_highlight: var(--_highlight-light);
+
+    --_shadow-strength-light: 1%;
+    --_shadow-strength-dark: 25%;
+    --_shadow-strength: var(--_shadow-strength-light);
+
+    --_shadow-color: var(--main-color-secondary);
+    --_border-light: hsl(var(--main-color-secondary));
+    --_border: var(--_border-light);
+
+    --_shadow-1: 0 1px 2px -1px hsl(var(--_shadow-color)/calc(var(--_shadow-strength) + 9%));
+    --_shadow-2: 
+        0 3px 5px -2px hsl(var(--_shadow-color)/calc(var(--_shadow-strength) + 3%)),
+        0 7px 14px -5px hsl(var(--_shadow-color)/calc(var(--_shadow-strength) + 5%));
+    
+    --_shadow-depth-light: 0 1px var(--_border-light);
+    --_shadow-depth-dark: 0 1px var(--_bg-dark);
+    --_shadow-depth: var(--_shadow-depth-light);
+
+    border: 2px solid var(--_border);
+
+    box-shadow: 
+        var(--_shadow-2),
+        var(--_shadow-depth),
+        0 0 0 var(--_highlight-size) var(--_highlight)
+    ;
+
+    
+    --left-right-shadow: 0.5rem;
     background-image:
         linear-gradient(to top,
-            hsla(0, 0%, 100%, 0.2) 0%,
+            hsla(0, 0%, 100%, 0) 0%,
             hsla(0, 0%, 100%, 0.5) 10%,
             hsla(0, 0%, 100%, 0.2) 20%,
             hsla(0, 0%, 100%, 0) 80%,
             hsla(0, 0%, 100%, 0.8) 93%,
-            hsla(0, 0%, 100%, 0.2) 100%),
+            hsla(0, 0%, 100%, 0) 100%),
         linear-gradient(to right,
             hsla(0, 0%, 0%, 1) 0%,
-            hsla(0, 0%, 0%, 0) 3px,
-            hsla(0, 0%, 0%, 0) calc(100% - 3px),
+            hsla(0, 0%, 0%, 0) var(--left-right-shadow),
+            hsla(0, 0%, 0%, 0) calc(100% - var(--left-right-shadow)),
             hsla(0, 0%, 0%, 1) 100%);
     background-blend-mode: overlay;
+    cursor: pointer;
+    z-index: 20;
+    position: relative;
 }
 
-.boutonBombe:hover {
+.boutonBombe:active {
     background-image:
         linear-gradient(to top,
-            hsla(0, 0%, 100%, 0.8) 0%,
+            hsla(0, 0%, 100%, 1) 0%,
             hsla(0, 0%, 100%, 0.5) 10%,
             hsla(0, 0%, 100%, 0.8) 20%,
             hsla(0, 0%, 100%, 1) 80%,
-            hsla(0, 0%, 100%, 0.2) 93%,
-            hsla(0, 0%, 100%, 0.8) 100%),
+            hsla(0, 0%, 100%, 0) 93%),
         linear-gradient(to right,
             hsla(0, 0%, 0%, 1) 0%,
-            hsla(0, 0%, 0%, 0) 3px,
-            hsla(0, 0%, 0%, 0) calc(100% - 3px),
+            hsla(0, 0%, 0%, 0) var(--left-right-shadow),
+            hsla(0, 0%, 0%, 0) calc(100% - var(--left-right-shadow)),
             hsla(0, 0%, 0%, 1) 100%);
     background-blend-mode: overlay;
 }
@@ -129,7 +168,9 @@
 #answer button {
     font-size: inherit;
     flex: 0.2;
-    background-color: var(--secondary-color-lighter);
+    background-color: hsl(var(--secondary-color-lighter));
+    --_shadow-color: var(--secondary-color);
+    --_border-light: hsl(var(--secondary-color));
 }
 
 .chatContainer {
@@ -161,7 +202,7 @@
 }
 
 .card {
-    background-color: var(--main-color-secondary-lighter);
+    background-color: hsl(var(--main-color-secondary-lighter));
     border-radius: 0.5rem;
     width: 100%;
     display: flex;
@@ -170,7 +211,7 @@
 }
 
 .card.empty {
-    background-color: var(--main-color-secondary-darker);
+    background-color: hsl(var(--main-color-secondary-darker));
 }
 
 .card.hasAnswered {
@@ -197,7 +238,7 @@
     border-color: white;
     border-style: solid;
     margin-top: 0.3rem;
-    background-color: var(--main-color-secondary-lighter);
+    background-color: hsl(var(--main-color-secondary-lighter));
 }
 
 #leftWrapper {
@@ -221,4 +262,33 @@
     column-gap: 0.6rem;
     width: 100%;
     margin-top: 1rem;
+}
+
+#modal {
+    width: 100%;
+    height: 100%;
+    background-color: hsl(0 0 0);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#modal>div {
+    padding: 20px;
+    text-align: center;
+}
+
+#modal input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: transparent;
+}
+
+#modal button {
+    padding: 10px 20px;
+    background-color: hsl(var(--main-color-secondary));
+    color: white;
 }

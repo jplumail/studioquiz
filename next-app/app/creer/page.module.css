@@ -1,0 +1,33 @@
+#copyTextBox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+}
+
+#copyTextBox > div {
+    padding: 8px;
+    width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+}
+
+#creer {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    height: 50%;
+    justify-items: center;
+    align-items: center;
+    align-content: center;
+}
+
+#creer svg {
+    fill: currentColor;
+}
+
+#creer > * {
+    display: grid;
+    justify-items: center;
+}
