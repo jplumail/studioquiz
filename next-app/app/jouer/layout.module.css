@@ -20,7 +20,8 @@
 #tv {
     position: relative;
     border: solid 6px black;
-    background-color: black
+    background-color: black;
+    height: 600px;
 }
 #tv::before {
     content: '';
@@ -44,6 +45,7 @@
     border: solid 1px gray;
     border-radius: 10px;
     overflow: hidden;
+    height: 100%;
 }
 
 #contentContainer header {
