@@ -1,7 +1,15 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --main-color: #af6a9f;
+  --main-color: hsl(314, 30%, 55%);
+  --main-color-secondary: hsl(286, 96%, 20%);
+  --main-color-secondary-lighter: hsl(286deg 96% 30%);
+  --main-color-secondary-darker: hsl(286deg 96% 17.5%);
+  --secondary-color: hsl(0deg 100% 27%);
+  --secondary-color-darker: hsl(0deg 100% 20%);
+  --secondary-color-lighter: hsl(0deg 100% 35%);
+  --secondary-color-secondary: hsl(33deg 80% 70%);
+  --secondary-color-secondary-darker: hsl(33deg 80% 50%);
 }
 
 @media (prefers-color-scheme: dark) {

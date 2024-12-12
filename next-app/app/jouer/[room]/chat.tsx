@@ -49,7 +49,7 @@ function PlayerMessageComponent({ player, message }: { player: Player, message: 
     const pseudoColor = "#0090ff";
     return (
         <div>
-            <span style={{ color: pseudoColor }}>{player}</span><span style={{ color: pseudoColor }}>{" > "}</span><span>{message}</span>
+            <span className={styles.pseudo}>{player}</span><span className={styles.pseudo}>{" > "}</span><span className={styles.playerMessage}>{message}</span>
         </div>
     );
 }
@@ -103,6 +103,7 @@ function TextArea({ sendMessage }: TextAreaProps) {
     return (
         <form id={styles.answer} onSubmit={handleSubmit}>
             <textarea
+                spellCheck={false}
                 autoFocus
                 rows={1}
                 value={content}
@@ -114,7 +115,7 @@ function TextArea({ sendMessage }: TextAreaProps) {
                     }
                 }}
             ></textarea>
-            <button type="submit">Répondre</button>
+            <button className={styles.boutonBombe} type="submit">DIRE</button>
         </form>
     );
 }

@@ -4,7 +4,8 @@ import Chat from './chat';
 import styles from './page.module.css';
 import Scoreboard from './scoreboard';
 import Clock from './clock';
-import DialogBox from './dialogueBox';
+import Presentateur from './presentateur';
+import Applaudissements from './applaudissements';
 import { useEffect, useRef, useState } from 'react';
 import { types, ChatMessage } from '@/types';
 import { io, Socket } from 'socket.io-client';
@@ -126,12 +127,15 @@ export default function Game({ room, pseudo }: { room: types.RoomId, pseudo: typ
         <div id={styles.gameContainer}>
             <audio ref={correctAnswerAudio} src="/correct-answer.mp3" />
             {(state == types.State.QUESTION) && (questionStartDate && questionEndDate) && <div style={{ position: "absolute", margin: "0.5rem", zIndex: 1 }}><Clock startDate={questionStartDate} endDate={questionEndDate} /></div>}
-            <div className={styles.column} style={{ backgroundColor: "hsl(285.77deg 96.04% 19.8%)", display: 'grid', justifyItems: "center" }}>
-                <div style={{ position: "relative", left: "40px", zIndex: 0 }}><Image src='/presentateur.jpeg' width={219} height={230} alt='Présentateur' id={styles.presentateur}/></div>
-                {sentence && <DialogBox sentence={sentence} />}
-                <Scoreboard scores={scores} hasAnswered={hasAnswered} />
+            <div className={styles.column} id={styles.left}>
+                <div id={styles.leftWrapper}>
+                    <Image src='/salle.webp' width={988} height={748} alt='Salle' id={styles.salle} />
+                    <Presentateur sentence={sentence}/>
+                    <Applaudissements />
+                    <Scoreboard scores={scores} hasAnswered={hasAnswered} />
+                </div>
             </div>
-            <div className={styles.column}>
+            <div className={styles.column} id={styles.right}>
                 <Chat sendMessage={sendMessage} messages={messages} />
             </div>
         </div>

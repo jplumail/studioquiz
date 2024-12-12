@@ -21,7 +21,11 @@ export default function Page({
                 </div>
             </header>
             <main className={styles.roundedContainer}>
-                {children}
+                <div id={styles.tv}>
+                    <div>
+                    {children}
+                    </div>
+                </div>
             </main>
         </div>
     );

@@ -3,16 +3,7 @@ import styles from './page.module.css';
 
 export default function Scoreboard({ scores, hasAnswered }: {scores: Map<types.Player, types.Score>, hasAnswered: Map<types.Player, boolean>}) {
     return (
-        <div style={{
-            height: 'fit-content',
-            marginTop: 'auto',
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            gridTemplateRows: "repeat(4, auto)",
-            gridAutoFlow: "column",
-            padding: "1rem",
-            gap: "0.2rem"
-        }}>
+        <div id={styles.scoreBoard}>
             {Array.from(scores).sort(([_playerA, scoreA], [_playerB, scoreB]) => scoreB - scoreA).map(([player, score], index) => (
                 <PlayerCard key={index} player={player} score={score} hasAnswered={hasAnswered.get(player) || false} />
             ))}
