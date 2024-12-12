@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import localFont from "next/font/local";
 import "./globals.css";
 import styles from './layout.module.css';
@@ -53,6 +54,7 @@ export default function RootLayout({
                 </div>
             </main>
         </div>
+        <SpeedInsights/>
       </body>
     </html>
   );
