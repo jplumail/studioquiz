@@ -39,7 +39,10 @@ pnpm dev
 - [x] fix mobile display
 - [x] generate questions
 - [x] passer par create room pour créer les rooms, interdire la connexion sinon
-- [ ] joining room fails when server is cold
+- [x] joining room fails when server is cold
 - [ ] questions database
 - [x] restart game easily
 - [ ] lien généré par create game en prod ne sont pas bon
+- [ ] faire la page /jouer
+- [ ] faire un login (simple) avec système de session pour ne pas avoir à donner son nom à chaque fois
+- [ ] ajouter les sons
