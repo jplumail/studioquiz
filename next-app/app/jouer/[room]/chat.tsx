@@ -103,6 +103,7 @@ function TextArea({ sendMessage }: TextAreaProps) {
     return (
         <form id={styles.answer} onSubmit={handleSubmit}>
             <textarea
+                aria-label="Réponse"
                 spellCheck={false}
                 autoFocus
                 rows={1}
@@ -114,7 +115,7 @@ function TextArea({ sendMessage }: TextAreaProps) {
                         handleSubmit(e as React.FormEvent);
                     }
                 }}
-            ></textarea>
+            />
             <button className={styles.boutonBombe} type="submit">DIRE</button>
         </form>
     );
