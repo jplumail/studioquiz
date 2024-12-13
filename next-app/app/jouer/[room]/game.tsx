@@ -1,11 +1,11 @@
 'use client';
 
-import Chat from './chat';
+import Chat from './components/chat';
 import styles from './page.module.css';
-import Scoreboard from './scoreboard';
-import Clock from './clock';
-import Presentateur from './presentateur';
-import Applaudissements from './applaudissements';
+import Scoreboard from './components/scoreboard';
+import Clock from './components/clock';
+import Presentateur from './components/presentateur';
+import Applaudissements from './components/applaudissements';
 import { useEffect, useRef, useState } from 'react';
 import { types, ChatMessage } from '@/types';
 import { io, Socket } from 'socket.io-client';

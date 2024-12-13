@@ -1,5 +1,5 @@
 import { types } from '@/types';
-import styles from './page.module.css';
+import styles from './../page.module.css';
 
 export default function Scoreboard({ scores, hasAnswered }: {scores: Map<types.Player, types.Score>, hasAnswered: Map<types.Player, boolean>}) {
     return (

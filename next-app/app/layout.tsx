@@ -4,7 +4,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import styles from './layout.module.css';
 import Image from 'next/image';
-import RoomInfo from './jouer/[room]/roomInfo';
+import RoomInfo from './jouer/[room]/components/roomInfo';
 
 
 const geistSans = localFont({

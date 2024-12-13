@@ -1,10 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
-import styles from './page.module.css';
+import styles from './../page.module.css';
 import { Player, Answer } from 'shared';
-import { ChatMessage } from '../../../types';
+import { ChatMessage } from '@/types';
 
-
-const player: Player = "haha" as Player;
 
 interface ChatProps {
     sendMessage: (content: string) => void;
