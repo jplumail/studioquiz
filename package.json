@@ -1,0 +1,12 @@
+{
+  "name": "studioquiz-project",
+  "version": "0.0.0",
+  "workspaces": [
+    "game-server",
+    "next-app",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "pnpm run -r dev"
+  }
+}

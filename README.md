@@ -11,16 +11,11 @@ Install gcloud and pubsub-emulator:
 gcloud components install pubsub-emulator
 ```
 
-Launch game server:
-```
-cd game-server
-pnpm dev
-```
+Install [mitdump](https://docs.mitmproxy.org/).
 
-Launch Next app:
+Launch project:
 ```
-cd next-app
-pnpm dev
+pnpm run -r dev
 ```
 
 ### TODO
