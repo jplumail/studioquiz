@@ -35,26 +35,26 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-      <div id={styles.contentContainer}>
-            <header className={styles.roundedContainer}>
-                <Image id={styles.logo} src="/logo.png" alt="StudioQuiz" width={137} height={106} />
-                <nav>
-                    <a href="/jouer"><span>Jouer</span></a>
-                    <a href="/creer"><span>Créer une partie</span></a>
-                </nav>
-                <div id={styles.infos}>
-                    <RoomInfo />
-                </div>
-            </header>
-            <main className={styles.roundedContainer}>
-                <div id={styles.tv}>
-                    <div>
-                    {children}
-                    </div>
-                </div>
-            </main>
+        <div id={styles.contentContainer}>
+          <header className={styles.roundedContainer}>
+            <Image id={styles.logo} src="/logo.png" alt="StudioQuiz" width={137} height={106} />
+            <nav>
+              <a href="/jouer"><span>Jouer</span></a>
+              <a href="/creer"><span>Créer une partie</span></a>
+            </nav>
+            <div id={styles.infos}>
+              <RoomInfo />
+            </div>
+          </header>
+          <main className={styles.roundedContainer}>
+            <div id={styles.tv}>
+              <div>
+                {children}
+              </div>
+            </div>
+          </main>
         </div>
-        <SpeedInsights/>
+        <SpeedInsights />
       </body>
     </html>
   );
