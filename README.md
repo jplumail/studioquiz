@@ -6,17 +6,15 @@ pnpm install
 
 ### Run locally
 
-Launch game server:
+Install gcloud and pubsub-emulator:
 ```
 gcloud components install pubsub-emulator
-gcloud beta emulators pubsub start --project=studioquiz
+```
 
-$(gcloud beta emulators pubsub env-init)
+Launch game server:
+```
 cd game-server
 pnpm dev
-
-# reverse proxy for LMStudio
-mitmdump --mode reverse:http://localhost:1234 -p 1235
 ```
 
 Launch Next app:

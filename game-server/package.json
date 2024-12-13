@@ -8,8 +8,15 @@
     "package.json"
   ],
   "scripts": {
+    "dev:start:pubsub": "gcloud beta emulators pubsub start --project=studioquiz",
+    "dev:start:proxy": "mitmdump --mode reverse:http://localhost:1234 -p 1235",
+    "dev:start:node": "nodemon --watch './dist/src' --exec '$(gcloud beta emulators pubsub env-init) && node ./dist/src/index.js'",
+    "dev:start:all": "npm run dev:start:pubsub & npm run dev:start:proxy & npm run dev:start:node",
+    "dev:stop:pubsub": "pkill -f '/usr/bin/java -jar /Users/jean/.local/google-cloud-sdk/platform/pubsub-emulator'",
+    "dev:stop:proxy": "pkill -f 'mitmdump --mode reverse:http://localhost:1234 -p 1235'",
+    "dev:stop:all": "npm run dev:stop:pubsub && npm run dev:stop:proxy",
+    "dev": "./dev.sh",
     "build": "tsc -b .",
-    "dev": "tsc-watch -b . --onSuccess \"npm run start\"",
     "start": "node ./dist/src/index.js"
   },
   "dependencies": {
@@ -24,6 +31,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
+    "nodemon": "^3.1.7",
     "tsc-watch": "^6.2.1",
     "type-fest": "^4.30.0",
     "typescript": "^5.7.2"
