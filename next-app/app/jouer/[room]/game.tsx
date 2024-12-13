@@ -129,13 +129,16 @@ export default function Game({ room, pseudo }: { room: types.RoomId, pseudo: typ
             {(state == types.State.QUESTION) && (questionStartDate && questionEndDate) && <div style={{ position: "absolute", margin: "0.5rem", zIndex: 1 }}><Clock startDate={questionStartDate} endDate={questionEndDate} /></div>}
             <div className={styles.column} id={styles.left}>
                 <div id={styles.leftWrapper}>
-                    <Image src='/salle.webp' width={988} height={748} alt='Salle' id={styles.salle} />
-                    <Presentateur sentence={sentence}/>
+                    <div id={styles.presentateurWrapper}>
+                        <Image src='/salle.webp' width={988} height={748} alt='Salle' id={styles.salle} />
+                        <Presentateur />
+                    </div>
                     <Applaudissements />
                     <Scoreboard scores={scores} hasAnswered={hasAnswered} />
                 </div>
             </div>
             <div className={styles.column} id={styles.right}>
+                <div id={styles.dialogueBox}>{sentence}</div>
                 <Chat sendMessage={sendMessage} messages={messages} />
             </div>
         </div>

@@ -32,12 +32,16 @@
     font-weight: 700;
 }
 
+#presentateurWrapper {
+    position: relative;
+}
+
 #presentateur {
     position: absolute;
     width: auto;
     height: 150px;
-    left: 75px;
-    top: 46px;
+    left: 10%;
+    bottom: 26%;
 }
 
 @media screen and (min-width: 750px) {
