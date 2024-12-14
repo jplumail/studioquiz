@@ -6,8 +6,8 @@
 }
 
 #contentContainer > main {
-    flex: 1;
     padding: 1rem;
+    flex: 1;
 }
 
 .roundedContainer {
@@ -21,7 +21,7 @@
     position: relative;
     border: solid 6px black;
     background-color: black;
-    height: 600px;
+    height: 100%;
 }
 #tv::before {
     content: '';
@@ -49,11 +49,13 @@
 }
 
 #contentContainer header {
-    height: 100px;
-    margin-bottom: 20px;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    height: 4rem;
+    font-size: 1rem;
+    position: relative;
+    margin-bottom: 1rem;
+    display: flex;
     align-items: center;
+    justify-content: space-between;
     border-width: 4px;
     box-shadow: inset 0px 0px 1px 2px #000000;
     background-color: hsl(var(--main-color));
@@ -63,8 +65,14 @@
         radial-gradient(ellipse 103% 190% at bottom -10% left 54%, hsla(0, 0%, 100%, 0) 0% 50%, hsla(0, 0%, 100%, 30%) 50%);
 }
 
+@media screen and (min-height: 600px) {
+    #contentContainer header {
+        height: 6rem;
+        font-size: 1.5rem;
+    }
+}
+
 #contentContainer header nav {
-    font-size: 1.5rem;
     font-weight: 700;
     display: flex;
     gap: 0.5em;
@@ -81,7 +89,6 @@
 
 #contentContainer header nav a:not(:last-child)::after {
     content: "•";
-    font-size: 1.5rem;
     color: hsla(0, 0%, 100%, 0.7);
     margin-left: 0.5em;
 }
@@ -91,17 +98,17 @@
 } 
 
 #logo {
-    margin: 20px;
-    height: 165%;
+    height: 150%;
+    align-self: end;
     width: auto;
     position: relative;
-    top: -16px;
+    bottom: 0%;
+    left: 0%;
 }
 
 #infos {
     --info-border-radius: 5px;
-    display: flex;
-    flex-direction: row-reverse;
+    justify-self: end;
     height: 80%;
 }
 
@@ -113,6 +120,7 @@
     justify-content: space-evenly;
     background-color: hsla(0, 0%, 100%, 0.2);
     border-radius: var(--info-border-radius);
+    height: 100%;
 }
 
 #infos > div > div {
@@ -123,7 +131,6 @@
 #infos .infoName {
     color: hsl(var(--main-color));
     font-weight: bold;
-    font-size: 1.5rem;
     flex: 1;
     text-shadow:
         0.5px 0.5px 0 white,
@@ -136,7 +143,6 @@
 
 #infos .infoValue {
     color: hsl(47.47deg 93.81% 80.98%);
-    font-size: 1.5rem;
     font-weight: bold;
     background-image: linear-gradient(-2deg, hsla(0, 0%, 100%, 0.2) 0% 60%, hsla(0, 0%, 100%, 0.5) 60% 100%);
     flex: 1;
