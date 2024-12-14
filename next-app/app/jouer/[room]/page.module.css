@@ -34,13 +34,14 @@
 
 #presentateurWrapper {
     position: relative;
+    width: 100%;
 }
 
 #presentateur {
     position: absolute;
     width: auto;
-    height: 150px;
-    left: 10%;
+    height: 60%;
+    left: 15%;
     bottom: 26%;
 }
 
@@ -48,10 +49,6 @@
     #gameContainer {
         grid-template-columns: 1fr 1fr;
         grid-template-rows: none;
-    }
-
-    #presentateur {
-        height: 200px;
     }
 
     #dialogueBox {
