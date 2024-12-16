@@ -5,7 +5,7 @@
 }
 
 #contentContainer > main {
-    top: calc(var(--header-height) / (var(--content-container-height)/100) * 1%);
+    top: var(--header-height);
     position: fixed;
     height: calc(var(--main-height) / (var(--content-container-height)/100) * 1%);
     padding: 1rem;
@@ -54,19 +54,19 @@
 @media (max-aspect-ratio: 4/3) {
     #contentContainer {
         --content-container-height: 100;
-        --main-height: 90;
+        --main-height: none;
         aspect-ratio: auto;
         width: 100%;
     }
 
     #contentContainer > header {
-        height: calc(var(--header-height) * 1%);
+        height: 4rem;
     }
 
     #contentContainer > main {
         margin-top: 0rem;
         padding: 0.7rem;
-        height: calc(var(--main-height) * 1%);
+        height: calc(100% - 4rem);
     }
 }
 

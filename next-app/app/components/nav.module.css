@@ -1,7 +1,6 @@
 #header {
-    --header-height: 10;
-    --row-height: calc(var(--header-height) / (var(--content-container-height)/100) * 1%);
-    height: var(--row-height);
+    --header-height: 4rem;
+    height: var(--header-height);
     font-size: var(--fs-600);
 
     display: grid;
@@ -34,7 +33,7 @@
 
     position: fixed;
     display: none;
-    top: calc(var(--row-height) * 0.75);
+    top: calc(var(--header-height) * 0.85);
     max-height: 0;
     justify-self: end;
     align-items: flex-end;

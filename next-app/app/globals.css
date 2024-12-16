@@ -17,12 +17,12 @@
   --fs-500: 0.95rem;
   --fs-400: 0.9rem;
 
-  --header-height: 11;
+  --header-height: 4em;
   --main-height: 80;
 
 }
 
-@media screen and (min-height: 35em) {
+@media screen and (min-width: 35em) {
   :root {
     --fs-xl: 3rem;
     --fs-600: 1.15rem;
@@ -31,7 +31,7 @@
   }
 }
 
-@media screen and (min-height: 45em) {
+@media screen and (min-width: 45em) {
   :root {
     --fs-xl: 3rem;
     --fs-600: 1.5rem;
