@@ -3,7 +3,7 @@
     display: grid;
     overflow: hidden;
     grid-template-rows:
-        [top] min-content [chat] auto;
+        [top] minmax(9rem, 1fr) [chat] 1fr;
     gap: 0;
     position: relative;
     width: 100%;
@@ -25,11 +25,13 @@
 }
 
 #dialogueBox {
+    position: absolute;
     background-color: white;
     padding: 0.5rem;
     border-radius: 0.5rem;
     color: hsl(31.35deg 73.55% 52.55%);
     font-weight: 700;
+    right: 0px;
 }
 
 #presentateurWrapper {
@@ -43,19 +45,6 @@
     height: 60%;
     left: 15%;
     bottom: 26%;
-}
-
-@media screen and (min-width: 750px) {
-    #gameContainer {
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: none;
-    }
-
-    #dialogueBox {
-        position: absolute;
-        right: 1rem;
-        top: 2rem;
-    }
 }
 
 .column {
@@ -113,23 +102,22 @@
     --_border: var(--_border-light);
 
     --_shadow-1: 0 1px 2px -1px hsl(var(--_shadow-color)/calc(var(--_shadow-strength) + 9%));
-    --_shadow-2: 
+    --_shadow-2:
         0 3px 5px -2px hsl(var(--_shadow-color)/calc(var(--_shadow-strength) + 3%)),
         0 7px 14px -5px hsl(var(--_shadow-color)/calc(var(--_shadow-strength) + 5%));
-    
+
     --_shadow-depth-light: 0 1px var(--_border-light);
     --_shadow-depth-dark: 0 1px var(--_bg-dark);
     --_shadow-depth: var(--_shadow-depth-light);
 
     border: 2px solid var(--_border);
 
-    box-shadow: 
+    box-shadow:
         var(--_shadow-2),
         var(--_shadow-depth),
-        0 0 0 var(--_highlight-size) var(--_highlight)
-    ;
+        0 0 0 var(--_highlight-size) var(--_highlight);
 
-    
+
     --left-right-shadow: 0.5rem;
     background-image:
         linear-gradient(to top,
@@ -245,11 +233,10 @@
 #leftWrapper {
     padding: 10px;
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse;
     justify-items: center;
     gap: 0;
     align-items: center;
-    height: 100%;
 }
 
 #scoreBoard {
@@ -289,4 +276,21 @@
     padding: 10px 20px;
     background-color: hsl(var(--main-color-secondary));
     color: white;
+}
+
+@media screen and (min-width: 40em) {
+    #gameContainer {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: none;
+    }
+
+    #dialogueBox {
+        position: absolute;
+        right: 1rem;
+        top: 2rem;
+    }
+
+    #leftWrapper {
+        flex-direction: column;
+    }
 }
