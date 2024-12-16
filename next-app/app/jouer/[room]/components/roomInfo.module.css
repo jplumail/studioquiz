@@ -1,5 +1,5 @@
 .infoName {
-    color: hsl(var(--main-color));
+    color: hsl(var(--main-color-darker));
     font-weight: bold;
     flex: 1;
     text-shadow:

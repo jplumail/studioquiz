@@ -2,6 +2,7 @@
   --background: #ffffff;
   --foreground: #171717;
   --main-color: 314 30% 55%;
+  --main-color-darker: 314 30% 45%;
   --main-color-secondary: 286 96% 20%;
   --main-color-secondary-lighter: 286deg 96% 30%;
   --main-color-secondary-darker: 286deg 96% 17.5%;
@@ -18,6 +19,7 @@
 
   --header-height: 11;
   --main-height: 80;
+
 }
 
 @media screen and (min-height: 35em) {
