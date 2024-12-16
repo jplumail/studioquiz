@@ -1,5 +1,5 @@
 #header {
-    --header-height: 11;
+    --header-height: 10;
     --row-height: calc(var(--header-height) / (var(--content-container-height)/100) * 1%);
     height: var(--row-height);
     font-size: var(--fs-600);
@@ -63,6 +63,7 @@
 #logo {
     grid-area: logo;
     height: 100%;
+    justify-self: left;
 }
 
 #logo>img {
@@ -78,7 +79,6 @@
 
 #infos {
     --info-border-radius: 5px;
-    justify-self: end;
     height: 80%;
 }
 
@@ -91,6 +91,7 @@
     background-color: hsla(0, 0%, 100%, 0.2);
     border-radius: var(--info-border-radius);
     height: 100%;
+    max-width: fit-content;
 }
 
 #infos>div>div {
@@ -101,14 +102,12 @@
 #mainMenuToggle {
     grid-area: toggle;
     display: block;
-    justify-self: end;
     height: 3rem;
     width: 3rem;
     background-color: transparent;
     border: none;
     padding: 5px;
     border-radius: 3px;
-    margin-right: 1rem;
 }
 
 #mainMenuToggle:hover {
@@ -124,7 +123,7 @@
     width: 100%;
 }
 
-@media (min-width: 35em) {
+@media (min-width: 40em) {
     #mainMenuToggle {
         display: none;
     }

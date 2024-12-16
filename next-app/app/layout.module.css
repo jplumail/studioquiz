@@ -10,7 +10,7 @@
     height: calc(var(--main-height) / (var(--content-container-height)/100) * 1%);
     padding: 1rem;
     width: 100%;
-    margin-top: 1rem;
+    margin-top: 0.7rem;
 }
 
 .roundedContainer {
@@ -53,13 +53,24 @@
 
 @media (max-aspect-ratio: 4/3) {
     #contentContainer {
+        --content-container-height: 100;
+        --main-height: 90;
         aspect-ratio: auto;
         width: 100%;
-        --content-container-height: 100;
+    }
+
+    #contentContainer > header {
+        height: calc(var(--header-height) * 1%);
+    }
+
+    #contentContainer > main {
+        margin-top: 0rem;
+        padding: 0.7rem;
+        height: calc(var(--main-height) * 1%);
     }
 }
 
-@media (min-width: 35em) {
+@media (min-width: 40em) {
     #contentContainer > main {
         position: relative;
         top: 0;
