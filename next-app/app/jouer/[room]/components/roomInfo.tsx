@@ -6,7 +6,6 @@ import styles from '../../../layout.module.css';
 
 export default function RoomInfo() {
     const pathName = usePathname().split('/');
-    console.log(pathName);
     if (pathName[1] === 'jouer' && pathName.length == 3) {
         const room = pathName.pop();
         return (
