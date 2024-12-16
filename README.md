@@ -51,3 +51,6 @@ pnpm run -r dev
 - [ ] assombrir le texte quand une question est terminée
 - [ ] mettre un système serveur anti flood
 - [ ] permettre aux utilisateurs de corriger une question
+
+Bugs:
+- [ ] layout shift du header quand on arrive dans une salle
