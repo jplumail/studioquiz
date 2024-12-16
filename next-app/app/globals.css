@@ -15,6 +15,9 @@
   --fs-600: 1rem;
   --fs-500: 0.95rem;
   --fs-400: 0.9rem;
+
+  --header-height: 11;
+  --main-height: 80;
 }
 
 @media screen and (min-height: 35em) {
@@ -51,7 +54,7 @@ body {
 
 body {
   color: var(--foreground);
-  background-image: url(/background.jpg);
+  background-image: url(/media/background.jpg);
   background-size: auto 103%;
   background-repeat: repeat-x;
   background-position-x: center;

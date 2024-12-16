@@ -3,6 +3,6 @@ import Image from 'next/image'
 
 export default function Presentateur() {
     return <>
-        <Image id={styles.presentateur} src='/presentateur.webp' alt='Marc Mazotti' width={131} height={120} />
+        <Image id={styles.presentateur} src='/media/presentateur.webp' alt='Marc Mazotti' width={131} height={120} />
     </>
 }

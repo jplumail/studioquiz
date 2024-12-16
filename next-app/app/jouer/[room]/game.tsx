@@ -130,7 +130,7 @@ export default function Game({ room, pseudo }: { room: types.RoomId, pseudo: typ
             <div className={styles.column} id={styles.left}>
                 <div id={styles.leftWrapper}>
                     <div id={styles.presentateurWrapper}>
-                        <Image src='/salle.webp' width={988} height={748} alt='Salle' id={styles.salle} />
+                        <Image src='/media/salle.webp' width={988} height={748} alt='Salle' id={styles.salle} />
                         <Presentateur />
                     </div>
                     <Applaudissements />

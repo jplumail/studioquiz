@@ -1,0 +1,177 @@
+#header {
+    --header-height: 11;
+    --row-height: calc(var(--header-height) / (var(--content-container-height)/100) * 1%);
+    height: var(--row-height);
+    font-size: var(--fs-600);
+
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: auto auto auto;
+    grid-template-areas:
+        "logo infos toggle"
+    ;
+
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+    top: -1px;
+    align-items: center;
+    background-image:
+        linear-gradient(90deg, hsla(0, 0%, 100%, 0.8) 0% 1%, hsla(0, 0%, 100%, 0) 5% 95%, hsla(0, 0%, 100%, 0.4) 99% 100%),
+        linear-gradient(70deg, hsla(0, 0%, 100%, 0) 90%, hsla(0, 0%, 100%, 0.4) 96% 100%);
+}
+
+.headerBorder {
+    border-width: 4px;
+    box-shadow: inset 0px 0px 1px 2px #000000;
+    background-color: hsl(var(--main-color));
+}
+
+#header nav {
+    font-weight: 700;
+    gap: 0.5em;
+
+    position: fixed;
+    display: none;
+    top: calc(var(--row-height) * 0.75);
+    max-height: 0;
+    justify-self: end;
+    align-items: flex-end;
+    margin-inline: 0.5rem;
+    padding: 0.5rem;
+}
+
+#header.showNav {
+    grid-template-rows: 1fr auto;
+}
+
+#header.showNav nav {
+    display: flex;
+    flex-direction: column;
+    max-height: fit-content;
+}
+
+#header nav a {
+    color: white;
+    position: relative;
+}
+
+#header nav a span:hover {
+    text-decoration: underline;
+}
+
+#logo {
+    grid-area: logo;
+    height: 100%;
+}
+
+#logo>img {
+    height: 170%;
+    align-self: end;
+    width: auto;
+    position: relative;
+    bottom: 50%;
+    left: 10%;
+    filter: drop-shadow(0px 0px 3px black);
+}
+
+
+#infos {
+    --info-border-radius: 5px;
+    justify-self: end;
+    height: 80%;
+}
+
+#infos>div {
+    margin-inline: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    background-color: hsla(0, 0%, 100%, 0.2);
+    border-radius: var(--info-border-radius);
+    height: 100%;
+}
+
+#infos>div>div {
+    display: flex;
+    align-items: center;
+}
+
+#mainMenuToggle {
+    grid-area: toggle;
+    display: block;
+    justify-self: end;
+    height: 3rem;
+    width: 3rem;
+    background-color: transparent;
+    border: none;
+    padding: 5px;
+    border-radius: 3px;
+    margin-right: 1rem;
+}
+
+#mainMenuToggle:hover {
+    cursor: pointer;
+    background-color: hsla(0, 0%, 100%, 0.1);
+}
+
+#mainMenuToggle>span {
+    background-image: url(/media/menu.svg);
+    background-size: cover;
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+@media (min-width: 35em) {
+    #mainMenuToggle {
+        display: none;
+    }
+
+    #header {
+        grid-template-areas: "logo nav infos";
+        grid-template-columns: 1fr 5fr 1fr;
+        position: relative;
+        background-image:
+            linear-gradient(90deg, hsla(0, 0%, 100%, 0.8) 0% 1%, hsla(0, 0%, 100%, 0) 5% 95%, hsla(0, 0%, 100%, 0.4) 99% 100%),
+            linear-gradient(70deg, hsla(0, 0%, 100%, 0) 90%, hsla(0, 0%, 100%, 0.4) 96% 100%),
+            radial-gradient(ellipse 103% 190% at bottom -10% left 54%, hsla(0, 0%, 100%, 0) 0% 50%, hsla(0, 0%, 100%, 30%) 50%);
+    }
+
+    #header nav {
+        display: flex;
+        justify-content: center;
+
+        grid-area: nav;
+        
+        position: relative;
+        top: unset;
+        max-height: unset;
+        justify-self: unset;
+        align-items: unset;
+        margin-inline: unset;
+        padding: 0;
+
+        border-width: 0;
+        box-shadow: none;
+        background-color: transparent;
+    }
+
+    #header nav a:not(:last-child)::after {
+        content: "•";
+        color: hsla(0, 0%, 100%, 0.7);
+        margin-left: 0.5em;
+    }
+
+    #header nav a:hover:not(:last-child)::after {
+        text-decoration: none;
+    }
+}
+
+@media (max-aspect-ratio: 4/3) {
+    #logo>img {
+        height: 120%;
+        bottom: 5%;
+    }
+}

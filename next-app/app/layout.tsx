@@ -3,9 +3,8 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import localFont from "next/font/local";
 import "./globals.css";
 import styles from './layout.module.css';
-import Image from 'next/image';
-import RoomInfo from './jouer/[room]/components/roomInfo';
 
+import Nav from './components/nav';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -36,16 +35,7 @@ export default function RootLayout({
     <html lang="fr">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <div id={styles.contentContainer}>
-          <header className={styles.roundedContainer}>
-            <Image id={styles.logo} src="/logo.png" alt="StudioQuiz" width={137} height={106} />
-            <nav>
-              <a href="/jouer"><span>Jouer</span></a>
-              <a href="/creer"><span>Créer une partie</span></a>
-            </nav>
-            <div id={styles.infos}>
-              <RoomInfo />
-            </div>
-          </header>
+          <Nav />
           <main className={styles.roundedContainer}>
             <div id={styles.tv}>
               <div>

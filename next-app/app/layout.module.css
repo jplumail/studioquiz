@@ -5,9 +5,12 @@
 }
 
 #contentContainer > main {
-    --main-height: 80;
+    top: calc(var(--header-height) / (var(--content-container-height)/100) * 1%);
+    position: fixed;
     height: calc(var(--main-height) / (var(--content-container-height)/100) * 1%);
     padding: 1rem;
+    width: 100%;
+    margin-top: 1rem;
 }
 
 .roundedContainer {
@@ -48,104 +51,17 @@
     height: 100%;
 }
 
-#contentContainer header {
-    --header-height: 11;
-    height: calc(var(--header-height) / (var(--content-container-height)/100) * 1%);
-    font-size: var(--fs-600);
-    position: relative;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-width: 4px;
-    box-shadow: inset 0px 0px 1px 2px #000000;
-    background-color: hsl(var(--main-color));
-    background-image:
-        linear-gradient(90deg, hsla(0, 0%, 100%, 0.8) 0% 1%, hsla(0, 0%, 100%, 0) 5% 95%, hsla(0, 0%, 100%, 0.4) 99% 100%),
-        linear-gradient(70deg, hsla(0, 0%, 100%, 0) 90%, hsla(0, 0%, 100%, 0.4) 96% 100%),
-        radial-gradient(ellipse 103% 190% at bottom -10% left 54%, hsla(0, 0%, 100%, 0) 0% 50%, hsla(0, 0%, 100%, 30%) 50%);
+@media (max-aspect-ratio: 4/3) {
+    #contentContainer {
+        aspect-ratio: auto;
+        width: 100%;
+        --content-container-height: 100;
+    }
 }
 
-#contentContainer header nav {
-    font-weight: 700;
-    display: flex;
-    gap: 0.5em;
-}
-
-#contentContainer header nav a {
-    color: white;
-    position: relative;
-}
-
-#contentContainer header nav a span:hover {
-    text-decoration: underline;
-}
-
-#contentContainer header nav a:not(:last-child)::after {
-    content: "•";
-    color: hsla(0, 0%, 100%, 0.7);
-    margin-left: 0.5em;
-}
-
-#contentContainer header nav a:hover:not(:last-child)::after {
-    text-decoration: none;
-} 
-
-#logo {
-    height: 170%;
-    align-self: end;
-    width: auto;
-    position: relative;
-    bottom: -19.5%;
-    left: 3%;
-    filter: drop-shadow(0px 0px 3px black);
-}
-
-#infos {
-    --info-border-radius: 5px;
-    justify-self: end;
-    height: 80%;
-}
-
-#infos > div {
-    margin-inline: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-evenly;
-    background-color: hsla(0, 0%, 100%, 0.2);
-    border-radius: var(--info-border-radius);
-    height: 100%;
-}
-
-#infos > div > div {
-    display: flex;
-    align-items: center;
-}
-
-#infos .infoName {
-    color: hsl(var(--main-color));
-    font-weight: bold;
-    flex: 1;
-    text-shadow:
-        0.5px 0.5px 0 white,
-        -0.5px 0.5px 0 white,
-        0.5px 0 0 white,
-        -0.5px 0 0 white,
-        0 0.5px 0 white;
-
-}
-
-#infos .infoValue {
-    color: hsl(47.47deg 93.81% 80.98%);
-    font-weight: bold;
-    background-image: linear-gradient(-2deg, hsla(0, 0%, 100%, 0.2) 0% 60%, hsla(0, 0%, 100%, 0.5) 60% 100%);
-    flex: 1;
-    border-radius: var(--info-border-radius);
-    border-width: 2px;
-    border-color: white;
-    border-style: solid;
-    padding-inline: 0.3rem;
-    box-shadow: inset 0px 1px 1px 0px black;
-    text-shadow: 0px 0.5px 2px black;
+@media (min-width: 35em) {
+    #contentContainer > main {
+        position: relative;
+        top: 0;
+    }
 }
