@@ -11,10 +11,28 @@
   --secondary-color-secondary: 33deg 80% 70%;
   --secondary-color-secondary-darker: 33deg 80% 50%;
 
-  --fs-xl: 4rem;
-  --fs-600: 2rem;
-  --fs-500: 1.5rem;
-  --fs-400: 1.125rem;
+  --fs-xl: 3rem;
+  --fs-600: 1rem;
+  --fs-500: 0.95rem;
+  --fs-400: 0.9rem;
+}
+
+@media screen and (min-height: 35em) {
+  :root {
+    --fs-xl: 3rem;
+    --fs-600: 1.15rem;
+    --fs-500: 1.1rem;
+    --fs-400: 1rem;
+  }
+}
+
+@media screen and (min-height: 45em) {
+  :root {
+    --fs-xl: 3rem;
+    --fs-600: 1.5rem;
+    --fs-500: 1.2rem;
+    --fs-400: 1.1rem;
+  }
 }
 
 @media (prefers-color-scheme: dark) {

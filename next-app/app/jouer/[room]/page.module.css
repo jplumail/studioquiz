@@ -1,4 +1,5 @@
 #gameContainer {
+    --game-font-size: var(--fs-400);
     display: grid;
     overflow: hidden;
     grid-template-rows:
@@ -7,6 +8,7 @@
     position: relative;
     width: 100%;
     height: 100%;
+    font-size: var(--game-font-size);
 }
 
 #left {
@@ -15,13 +17,11 @@
 
 #right {
     background-image: linear-gradient(hsl(var(--secondary-color-darker)), hsl(var(--secondary-color)));
-    font-size: 1.3rem;
 }
 
 #salle {
-    width: 100%;
-    height: auto;
-    object-fit: contain;
+    width: auto;
+    height: 100%;
 }
 
 #dialogueBox {
@@ -34,7 +34,7 @@
 
 #presentateurWrapper {
     position: relative;
-    width: 100%;
+    height: 50%;
 }
 
 #presentateur {
@@ -66,6 +66,7 @@
     display: flex;
     margin-top: auto;
     color: white;
+    height: calc(var(--game-font-size) * 2);
 }
 
 #answer textarea {
@@ -73,7 +74,6 @@
     resize: none;
     flex: 1;
     overflow: hidden;
-    height: 2rem;
     align-content: center;
     background-color: hsl(var(--secondary-color-darker));
     padding-inline: 0.5rem;
@@ -204,11 +204,11 @@
 
 .card {
     background-color: hsl(var(--main-color-secondary-lighter));
-    border-radius: 0.5rem;
+    border-radius: 10% / 25%;
     width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
-    aspect-ratio: 300 / 75;
 }
 
 .card.empty {
@@ -221,7 +221,6 @@
 
 .cardScore {
     margin-left: auto;
-    font-size: x-large;
     font-weight: bold;
     font-family: sans-serif;
 }
@@ -233,17 +232,18 @@
 #applaudissements {
     width: 100%;
     font-weight: bold;
-    font-size: 1.25rem;
+    font-size: inherit;
     border-radius: 5px;
     border-width: 1px;
     border-color: white;
     border-style: solid;
-    margin-top: 0.3rem;
+    margin-top: 0.1rem;
+    margin-bottom: 0.4rem;
     background-color: hsl(var(--main-color-secondary-lighter));
 }
 
 #leftWrapper {
-    padding: 15px;
+    padding: 10px;
     display: flex;
     flex-direction: column;
     justify-items: center;
@@ -253,16 +253,13 @@
 }
 
 #scoreBoard {
-    height: fit-content;
-    margin-top: auto;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(4, auto);
-    grid-auto-flow: column;
-    row-gap: 0.2rem;
-    column-gap: 0.6rem;
+    grid-template-rows: repeat(4, 1fr);
+    row-gap: 3px;
+    column-gap: 6px;
     width: 100%;
-    margin-top: 1rem;
+    flex: 1;
 }
 
 #modal {

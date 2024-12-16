@@ -1,13 +1,13 @@
 #contentContainer {
-    height: 90%;
+    --content-container-height: 90;
+    height: calc(var(--content-container-height) * 1%);
     aspect-ratio: 1.29;
-    display: flex;
-    flex-direction: column;
 }
 
 #contentContainer > main {
+    --main-height: 80;
+    height: calc(var(--main-height) / (var(--content-container-height)/100) * 1%);
     padding: 1rem;
-    flex: 1;
 }
 
 .roundedContainer {
@@ -49,8 +49,9 @@
 }
 
 #contentContainer header {
-    height: 4rem;
-    font-size: 1rem;
+    --header-height: 11;
+    height: calc(var(--header-height) / (var(--content-container-height)/100) * 1%);
+    font-size: var(--fs-600);
     position: relative;
     margin-bottom: 1rem;
     display: flex;
@@ -63,13 +64,6 @@
         linear-gradient(90deg, hsla(0, 0%, 100%, 0.8) 0% 1%, hsla(0, 0%, 100%, 0) 5% 95%, hsla(0, 0%, 100%, 0.4) 99% 100%),
         linear-gradient(70deg, hsla(0, 0%, 100%, 0) 90%, hsla(0, 0%, 100%, 0.4) 96% 100%),
         radial-gradient(ellipse 103% 190% at bottom -10% left 54%, hsla(0, 0%, 100%, 0) 0% 50%, hsla(0, 0%, 100%, 30%) 50%);
-}
-
-@media screen and (min-height: 600px) {
-    #contentContainer header {
-        height: 6rem;
-        font-size: 1.5rem;
-    }
 }
 
 #contentContainer header nav {
@@ -98,12 +92,13 @@
 } 
 
 #logo {
-    height: 150%;
+    height: 170%;
     align-self: end;
     width: auto;
     position: relative;
-    bottom: 0%;
-    left: 0%;
+    bottom: -19.5%;
+    left: 3%;
+    filter: drop-shadow(0px 0px 3px black);
 }
 
 #infos {
