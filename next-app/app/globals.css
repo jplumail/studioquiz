@@ -28,6 +28,8 @@
     --fs-600: 1.15rem;
     --fs-500: 1.1rem;
     --fs-400: 1rem;
+    --header-height: 4.2em;
+
   }
 }
 
@@ -37,6 +39,8 @@
     --fs-600: 1.5rem;
     --fs-500: 1.2rem;
     --fs-400: 1.1rem;
+
+    --header-height: 4.6em;
   }
 }
 

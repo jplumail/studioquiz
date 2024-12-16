@@ -59,14 +59,10 @@
         width: 100%;
     }
 
-    #contentContainer > header {
-        height: 4rem;
-    }
-
     #contentContainer > main {
         margin-top: 0rem;
         padding: 0.7rem;
-        height: calc(100% - 4rem);
+        height: calc(100% - var(--header-height));
     }
 }
 

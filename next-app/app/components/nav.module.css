@@ -1,5 +1,4 @@
 #header {
-    --header-height: 4rem;
     height: var(--header-height);
     font-size: var(--fs-600);
 
@@ -67,11 +66,11 @@
 }
 
 #logo>img {
-    height: 170%;
+    height: 150%;
     align-self: end;
     width: auto;
     position: relative;
-    bottom: 50%;
+    bottom: 37%;
     left: 10%;
     filter: drop-shadow(0px 0px 3px black);
 }
