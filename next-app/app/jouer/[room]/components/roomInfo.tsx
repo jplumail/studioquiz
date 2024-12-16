@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from "next/navigation";
-import styles from '../../../layout.module.css';
+import styles from './roomInfo.module.css';
 
 
 export default function RoomInfo() {
