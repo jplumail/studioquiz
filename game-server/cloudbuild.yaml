@@ -5,7 +5,7 @@ steps:
       - '--target=game-server'
       - --tag
       - >-
-        $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+        $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME/$BRANCH_NAME
       - '--file=game-server.Dockerfile'
       - '.'
     id: Build
@@ -13,7 +13,7 @@ steps:
     args:
       - push
       - >-
-        $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+        $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME/$BRANCH_NAME
     id: Push Image Commit
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     args:
@@ -22,7 +22,7 @@ steps:
       - $_SERVICE_NAME-$BRANCH_NAME
       - '--platform=managed'
       - >-
-        --image=$_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+        --image=$_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME/$BRANCH_NAME
       - >-
         --labels=managed-by=gcp-cloud-build-deploy-cloud-run,branch-name=$BRANCH_NAME,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
       - '--region=$_DEPLOY_REGION'
