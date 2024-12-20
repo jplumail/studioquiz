@@ -78,6 +78,7 @@
 #infos {
     --info-border-radius: 5px;
     height: 80%;
+    grid-area: infos;
 }
 
 #infos>div {
