@@ -19,7 +19,7 @@ export default function Nav() {
             id={styles.header} className={`${layoutStyles.roundedContainer} ${styles.headerBorder} ${showNav ? styles.showNav : ""}`}
         >
             <a id={styles.logo} href="/">
-                <Image src="/media/logo.png" alt="StudioQuiz" width={137} height={106} />
+                <Image src="/media/logo.png" alt="StudioQuiz" width={302} height={217} />
             </a>
             <div id={styles.infos}>
                 <RoomInfo />
