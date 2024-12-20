@@ -54,3 +54,12 @@ pnpm run -r dev
 
 Bugs:
 - [ ] layout shift du header quand on arrive dans une salle
+- [ ] tableau des scores pas bien ordonné
+- [ ] déconnexion quand changement d'onglet
+
+Idée pour générateur de questions:
+
+1. Trouver des thèmes variés et très précis puis génération par chatGPT
+2. Faire générer des thèmes variés à chatGPT (be creative !) puis générer des questions sur ces thèmes.
+Ensuite embeddings des questions. Puis choisir des questions assez éloignés pour un quizz.
+3. 
