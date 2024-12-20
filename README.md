@@ -53,7 +53,7 @@ pnpm run -r dev
 - [ ] permettre aux utilisateurs de corriger une question
 
 Bugs:
-- [ ] layout shift du header quand on arrive dans une salle
+- [x] layout shift du header quand on arrive dans une salle
 - [ ] tableau des scores pas bien ordonné
 - [ ] déconnexion quand changement d'onglet
 
