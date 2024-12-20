@@ -54,7 +54,7 @@ pnpm run -r dev
 
 Bugs:
 - [x] layout shift du header quand on arrive dans une salle
-- [ ] tableau des scores pas bien ordonné
+- [x] tableau des scores pas bien ordonné
 - [ ] déconnexion quand changement d'onglet
 
 Idée pour générateur de questions:
